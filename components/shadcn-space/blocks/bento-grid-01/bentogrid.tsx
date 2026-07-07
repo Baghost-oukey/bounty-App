@@ -1,6 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import ReminderAnimation from "@/components/shadcn-space/blocks/bento-grid-01/ReminderAnimation";
 import AnimatedUiBlock from "@/components/shadcn-space/blocks/bento-grid-01/AnimatedUiBlock";
+import Image from "next/image";
+import Images1 from "@/public/assets/Images/TerimaBarang.png"
+import Images2 from "@/public/assets/Images/Belajar.jpg"
+import Images3 from "@/public/assets/Images/designer.jpg"
 
 const Bentogrid = () => {
   return (
@@ -44,15 +48,12 @@ const Bentogrid = () => {
             <div className="lg:col-span-4 col-span-12 overflow-hidden">
               <div className="rounded-xl border border-border h-full flex flex-col">
                 <div className="p-8 bg-muted rounded-t-xl flex-1 flex items-center justify-center">
-                  <img
-                    src="https://images.shadcnspace.com/assets/bento-grid/bento-grid-img-1.png"
+                  <Image
+                    src={Images1}
                     alt="layout options"
                     className="dark:hidden"
-                  />
-                  <img
-                    src="https://images.shadcnspace.com/assets/bento-grid/bento-grid-darkimg-1.png"
-                    alt="layout options"
-                    className="hidden dark:block"
+                    width={ 500 }
+                    height={500}
                   />
                 </div>
                 <div className="flex flex-col gap-0.5 p-8 border-t border-border">
@@ -70,15 +71,12 @@ const Bentogrid = () => {
             <div className="lg:col-span-4 col-span-12 overflow-hidden">
               <div className="rounded-xl border border-border h-full flex flex-col">
                 <div className="p-8 bg-muted rounded-t-xl flex-1 flex items-center justify-center">
-                  <img
-                    src="https://images.shadcnspace.com/assets/bento-grid/bento-grid-img-2.png"
-                    alt="documentation"
+                  <Image
+                    src={Images2}
+                    alt="color options"
                     className="dark:hidden"
-                  />
-                  <img
-                    src="https://images.shadcnspace.com/assets/bento-grid/bento-grid-darkimg-2.png"
-                    alt="documentation"
-                    className="hidden dark:block"
+                    width={ 500 }
+                    height={500}
                   />
                 </div>
                 <div className="flex flex-col gap-0.5 p-8 border-t border-border">
@@ -96,9 +94,12 @@ const Bentogrid = () => {
             <div className="lg:col-span-4 col-span-12 overflow-hidden">
               <div className="rounded-xl border border-border h-full flex flex-col">
                 <div className="p-8 bg-muted rounded-t-xl flex-1 flex items-center justify-center relative">
-                  <img
-                    src="https://images.shadcnspace.com/assets/bento-grid/bento-grid-img-3.png"
+                  <Image
+                    src={Images3}
                     alt="color options"
+                    className="dark:hidden"
+                    width={ 500 }
+                    height={500}
                   />
                 </div>
                 <div className="flex flex-col gap-0.5 p-8 border-t border-border">

@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 
 
 const poppins = Poppins({
-  variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"]
 });
@@ -23,7 +22,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", poppins.variable, "font-sans")}
+      className={cn("h-full", "antialiased", poppins.className, "font-sans")}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
