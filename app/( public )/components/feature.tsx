@@ -25,13 +25,13 @@ export default function FeaturesSection() {
       icon: <IconEaseInOut />,
     },
     {
-      title: "Layanan",
+      title: "Layanan Pengiriman",
       description:
         "Our prices are best in the market. No cap, no lock, no credit card required.",
       icon: <IconCurrencyDollar />,
     },
     {
-      title: "100% Uptime guarantee",
+      title: "Layanan Antar Jemput",
       description: "We just cannot be taken down by anyone.",
       icon: <IconCloud />,
     },

@@ -1,99 +1,108 @@
 "use client";
 
 import { useRef } from "react";
-import {
-  motion,
-  useInView,
-} from "motion/react";
-import {
-  Rocket,
-  Cpu,
-  Target,
-  Flag,
-  LucideIcon,
-} from "lucide-react";
+import { motion, useInView, Variants } from "framer-motion";
+import { Rocket, Cpu, Target, Flag, LucideIcon } from "lucide-react";
 
 interface TimelineItem {
+  phaseNumber: string;
   title: string;
-  date: string;
   description: string;
   icon: LucideIcon;
+  color: string;
+  glowColor: string; // Pendaran warna halus di latar belakang
 }
 
 const items: TimelineItem[] = [
   {
-    title: "Phase I",
-    date: "January 15, 2024",
-    description: "Project initialization and strategic planning begins.",
+    phaseNumber: "01",
+    title: "Langkah Petrama",
+    description: "Daftarkan Dari anda Kesistem kami dan buat pengajuan",
     icon: Rocket,
+    color: "from-blue-500 to-indigo-600",
+    glowColor: "rgba(59,130,246,0.06)", // Pendaran biru halus
   },
   {
-    title: "Phase II",
-    date: "March 10, 2024",
-    description: "Detailed research and preliminary development stage.",
+    phaseNumber: "02",
+    title: "Langkah Kedua",
+    description: "Masukkan Apa Kendala Kamu Yang Mungkin Bisa Kami Bantu",
     icon: Cpu,
-  },
-  {
-    title: "Phase III",
-    date: "June 5, 2024",
-    description: "Core implementation and major milestones achieved.",
-    icon: Target,
-  },
-  {
-    title: "Phase IV",
-    date: "September 20, 2024",
-    description: "Final refinements and project completion.",
-    icon: Flag,
+    color: "from-purple-500 to-pink-600",
+     glowColor: "rgba(59,130,246,0.06)", // Pendaran biru halus
+     
+    },
+    {
+      phaseNumber: "03",
+      title: "Langkah Ketiga",
+      description: "Komunitas Akan Mengambil Tindakan Terhadap Pengajuan Kamu",
+      icon: Target,
+      color: "from-amber-500 to-orange-600",
+      glowColor: "rgba(59,130,246,0.06)", // Pendaran biru halus
+    },
+    {
+      phaseNumber: "04",
+      title: "Langkah Keempat",
+      description: "Kesepakatan Akan Dicapai Dan Masalah Kamu Akan Diselesaikan",
+      icon: Flag,
+      color: "from-emerald-500 to-teal-600",
+      glowColor: "rgba(59,130,246,0.06)", // Pendaran biru halus
   },
 ];
 
 export default function Timeline() {
-  const sectionRef = useRef(null);
-
+  const sectionRef = useRef<HTMLDivElement>(null);
   const inView = useInView(sectionRef, {
     once: false,
-    amount: 0.45,
+    amount: 0.2,
   });
 
   return (
-    <section
-      ref={sectionRef}
-      className="py-32"
-    >
-      <div className="mx-auto max-w-7xl px-6">
+    <section ref={sectionRef} className="relative bg-white overflow-hidden">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        
+        {/* Header Section dengan Gaya Minimalis Modern */}
+        <div className="mbe-10 max-w-2xl">
+          <h2 className="text-3xl font-black tracking-tight text-zinc-900 sm:text-6xl">
+            Panduan Penggunaan
+          </h2>
+          <p className="mt-4 text-base text-zinc-500 leading-relaxed">
+            Panduan untuk menggunakan sistem kami, jika masih bingung mohon ikuti langka
+          </p>
+        </div>
 
-        <h2 className="mb-20 text-5xl font-bold">
-          Timeline
-        </h2>
-
+        {/* Timeline Container */}
         <div className="relative">
+          
+          {/* Base Gray Track Line */}
+          <div className="absolute top-6 left-0 h-0.5 w-full bg-zinc-100 rounded-full" />
 
-          {/* Background */}
+          {/* Progress Segments */}
+          {items.map((_, index) => {
+            if (index === items.length - 1) return null;
+            return (
+              <motion.div
+                key={`line-segment-${index}`}
+                initial={{ width: "0%" }}
+                animate={{ width: inView ? "25%" : "0%" }}
+                transition={{
+                  duration: 1.4,
+                  delay: index * 1.8,
+                  ease: "linear",
+                }}
+                className="absolute top-6 h-[2px] bg-zinc-900 z-10"
+                style={{ left: `${index * 25}%` }}
+              />
+            );
+          })}
 
-          <div className="absolute top-6 left-0 h-[2px] w-full bg-zinc-200" />
-
-          {/* Animated */}
-
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{
-              width: inView ? "100%" : "0%",
-            }}
-            transition={{
-              duration: 2,
-              ease: "easeInOut",
-            }}
-            className="absolute top-6 left-0 h-[2px] bg-black"
-          />
-
-          <div className="grid grid-cols-1 gap-16 md:grid-cols-2 lg:grid-cols-4">
-
+          {/* Grid Cards layout */}
+          <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4 relative z-20">
             {items.map((item, index) => (
-              <TimelineCard
-                key={index}
-                item={item}
-                index={index}
-                active={inView}
+              <TimelineCard 
+                key={item.title} 
+                item={item} 
+                index={index} 
+                inView={inView} 
               />
             ))}
           </div>
@@ -106,59 +115,80 @@ export default function Timeline() {
 interface CardProps {
   item: TimelineItem;
   index: number;
-  active: boolean;
+  inView: boolean;
 }
 
-function TimelineCard({
-  item,
-  index,
-  active,
-}: CardProps) {
-
+function TimelineCard({ item, index, inView }: CardProps) {
   const Icon = item.icon;
+  const baseDelay = index * 1.8;
+
+  const iconVariants: Variants = {
+    hidden: { scale: 0, opacity: 0 },
+    visible: {
+      scale: 1,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 150, damping: 12, delay: baseDelay },
+    },
+  };
+
+  const cardVariants: Variants = {
+    hidden: { opacity: 0, y: 25 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 90, damping: 15, delay: baseDelay + 0.4 },
+    },
+  };
 
   return (
-    <motion.div
-      initial={{
-        opacity: 0.3,
-        y: 20,
-      }}
-      animate={{
-        opacity: active ? 1 : 0.3,
-        y: active ? 0 : 20,
-      }}
-      transition={{
-        duration: 0.6,
-        delay: index * 0.3,
-      }}
-    >
+    <div className="group flex flex-col items-start w-full relative">
+      
+      {/* 1. Ambient Glow Background: Muncul samar di belakang card agar tidak terasa hampa */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: inView ? 1 : 0 }}
+        transition={{ duration: 1, delay: baseDelay + 0.3 }}
+        className="absolute -inset-4 rounded-3xl pointer-events-none blur-2xl transition-all duration-500 group-hover:scale-105"
+        style={{ backgroundColor: item.glowColor }}
+      />
+
+      {/* Checkpoint Ikon Indikator */}
       <motion.div
-        initial={{
-          scale: 1,
-        }}
-        animate={{
-          scale: active ? 1.15 : 1,
-        }}
-        transition={{
-          delay: index * 0.3,
-          type: "spring",
-        }}
-        className="mb-10 flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-300 bg-white shadow"
+        variants={iconVariants}
+        initial="hidden"
+        animate={inView ? "visible" : "hidden"}
+        className="mb-8 flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-800 shadow-sm relative z-10 transition-all duration-300 group-hover:border-zinc-400 group-hover:shadow"
       >
         <Icon size={18} />
       </motion.div>
 
-      <p className="mb-2 text-sm text-zinc-500">
-        {item.date}
-      </p>
+      {/* Premium Content Card */}
+      <motion.div
+        variants={cardVariants}
+        initial="hidden"
+        animate={inView ? "visible" : "hidden"}
+        className="w-full relative rounded-2xl border border-zinc-200/70 bg-white p-6 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.03)] z-10 transition-all duration-500 hover:-translate-y-1 hover:border-zinc-300 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.08)]"
+      >
+        {/* Top Gradient Highlight Bar */}
+        <div className={`absolute top-0 left-0 right-0 h-[2.5px] rounded-t-2xl bg-gradient-to-r ${item.color}`} />
 
-      <h3 className="mb-3 text-3xl font-bold">
-        {item.title}
-      </h3>
-
-      <p className="text-zinc-600 leading-8">
-        {item.description}
-      </p>
-    </motion.div>
+        {/* Info Atas: Tanggal & Badge Angka Fase */}
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-xs font-extrabold tracking-tight text-zinc-300 bg-zinc-50 px-2 py-0.5 rounded-md border border-zinc-100 group-hover:text-zinc-500 group-hover:bg-zinc-100 transition-colors duration-300">
+            {item.phaseNumber}
+          </span>
+        </div>
+        
+        {/* Judul Fase */}
+        <h3 className="mb-2 text-xl font-extrabold text-zinc-900 tracking-tight">
+          {item.title}
+        </h3>
+        
+        {/* Deskripsi */}
+        <p className="text-sm text-zinc-500 leading-relaxed font-normal">
+          {item.description}
+        </p>
+      </motion.div>
+    </div>
   );
 }
