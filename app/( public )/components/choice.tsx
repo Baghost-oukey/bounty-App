@@ -14,21 +14,21 @@ interface FeatureItem {
 
 const features: FeatureItem[] = [
   {
-    id: "indigo",
+    id: "Pengguna",
     tag: "Services",
-    title: "Indigo Technology",
+    title: "Panduan Pengguna",
     description:
-      "Enhance teamwork with our real-time collaboration tools that keep your team connected and productive.",
+      "Untuk mendapatkan informasi lebih lanjut tentang cara menggunakan aplikasi Bounty, silakan pilih opsi ini.",
     image:
       "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800&auto=format&fit=crop", // Ganti dengan path image kamu
     gradient: "from-blue-600/20 via-transparent to-transparent",
   },
   {
-    id: "rapid",
+    id: "Komunitas",
     tag: "Analytics",
-    title: "Rapid Financial",
+    title: "Panduan Komunitas",
     description:
-      "Leverage powerful analytics to make informed decisions and drive your business forward.",
+      "Untuk mendapatkan informasi lebih lanjut tentang cara menggunakan aplikasi Bounty, silakan pilih opsi ini.",
     image:
       "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop", // Ganti dengan path image kamu
     gradient: "from-cyan-600/20 via-transparent to-transparent",
@@ -45,11 +45,14 @@ export default function FeatureSelection() {
         {/* Header Section */}
         <div className="text-center mb-20">
           <span className="text-sm font-semibold uppercase tracking-widest text-zinc-400 block mb-3">
-            Services
+            Layanan
           </span>
           <h2 className="text-4xl font-black tracking-tight text-zinc-900 sm:text-5xl max-w-3xl mx-auto leading-tight">
-            Our customers get results and save time
+            Informasi Aplikasi dan Layanan Bounty
           </h2>
+          <p className="mt-4 text-base text-zinc-500 leading-relaxed">
+            Untuk Mengetahui Panduan Lebih lanjut pilih salah satu Opsi dibawah ini
+          </p>
         </div>
 
         {/* 2-Column Responsive Grid Layout */}
