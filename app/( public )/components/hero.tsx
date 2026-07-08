@@ -1,27 +1,16 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { RocketIcon, ArrowRightIcon, PhoneCallIcon } from "lucide-react";
-import InfiniteSlider from "@/components/infinite-slider";
+import { ArrowRightIcon, PhoneCallIcon } from "lucide-react";
 import { LogoCloud } from "@/components/logo-cloud";
-import { div } from "motion/react-m";
 
 export function HeroSection() {
   return (
-    <div>
+    <div className="relative">
       <div
         aria-hidden="true"
-        className="absolute inset-0 isolate hidden overflow-hidden contain-strict lg:block"
+        className="absolute inset-0 isolate hidden overflow-hidden contain-strict lg:block pointer-events-none"
       >
-        <div className="absolute inset-0 -top-14 isolate -z-10 bg-[radial-gradient(35%_80%_at_49%_0%,--theme(--color-foreground/.08),transparent)] contain-strict" />
-      </div>
-
-      {/* X Bold Faded Borders */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 mx-auto hidden min-h-screen w-full max-w-5xl lg:block"
-      >
-        <div className="mask-y-from-80% mask-y-to-100% absolute inset-y-0 left-0 z-10 h-full w-px bg-foreground/15" />
-        <div className="mask-y-from-80% mask-y-to-100% absolute inset-y-0 right-0 z-10 h-full w-px bg-foreground/15" />
+        <div className="absolute inset-0 -top-14 isolate -z-10 bg-[radial-gradient(35%_80%_at_49%_0%,--theme(--color-foreground/.08),transparent)] contain-strict pointer-events-none" />
       </div>
 
       {/* main content */}

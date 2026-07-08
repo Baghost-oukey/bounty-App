@@ -15,15 +15,15 @@ export type NavigationSection = {
 const navigationData: NavigationSection[] = [
   {
     title: "Fitur",
-    href: "#",
+    href: "#features",
   },
   {
-    title: "Layanan Kami",
-    href: "#",
+    title: "Panduan",
+    href: "#panduan",
   },
   {
-    title: "Tentang Kami",
-    href: "#",
+    title: "Layanan",
+    href: "#layanan",
   },
   {
     title: "Kontak",
@@ -64,8 +64,8 @@ const Navbar = () => {
   }, [handleScroll, handleResize]);
 
   return (
-    <div>
-      <header className="bg-background">
+    <div className="sticky top-0 z-50 w-full bg-transparent">
+      <header className="bg-transparent">
         <div className="max-w-7xl mx-auto w-full px-4 py-4 sm:px-6">
           <nav
             className={cn(

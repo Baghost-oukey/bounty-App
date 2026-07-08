@@ -57,12 +57,12 @@ export default function Timeline() {
   });
 
   return (
-    <section ref={sectionRef} className="relative bg-white overflow-hidden">
+    <section id="panduan" ref={sectionRef} className="relative bg-white overflow-hidden">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Header Section dengan Gaya Minimalis Modern */}
         <div className="mbe-10 max-w-2xl">
-          <h2 className="text-3xl font-black tracking-tight text-zinc-900 sm:text-6xl">
+          <h2 className="text-2xl font-light tracking-tight text-zinc-900 sm:text-6xl">
             Panduan Penggunaan
           </h2>
           <p className="mt-4 text-base text-zinc-500 leading-relaxed">

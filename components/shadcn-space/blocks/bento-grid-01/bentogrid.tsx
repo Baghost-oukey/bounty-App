@@ -8,7 +8,7 @@ import Images3 from "@/public/assets/Images/designer.jpg"
 
 const Bentogrid = () => {
   return (
-    <section>
+    <section id="features">
       <div className="py-11 md:py-20">
         <div className="max-w-7xl xl:px-16 lg:px-8 px-4 mx-auto flex flex-col gap-12">
           <div className="grid grid-cols-12 gap-5">

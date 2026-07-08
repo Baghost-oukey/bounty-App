@@ -40,14 +40,14 @@ export default function FeatureSelection() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   return (
-    <section className="py-32 bg-white overflow-hidden select-none">
+    <section id="layanan" className="py-32 bg-white overflow-hidden select-none">
       <div className="mx-auto max-w-7xl px-6">
         {/* Header Section */}
         <div className="text-center mb-20">
           <span className="text-sm font-semibold uppercase tracking-widest text-zinc-400 block mb-3">
             Layanan
           </span>
-          <h2 className="text-4xl font-black tracking-tight text-zinc-900 sm:text-5xl max-w-3xl mx-auto leading-tight">
+          <h2 className="text-4xl font-semibold tracking-tight text-zinc-900 sm:text-5xl max-w-3xl mx-auto leading-tight">
             Informasi Aplikasi dan Layanan Bounty
           </h2>
           <p className="mt-4 text-base text-zinc-500 leading-relaxed">
@@ -112,7 +112,7 @@ export default function FeatureSelection() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
-                        className="absolute bottom-4 right-4 bg-zinc-900 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl border border-zinc-700/50 shadow"
+                        className="absolute bottom-4 right-4 bg-zinc-900 text-white text-[10px] font-semibold uppercase tracking-widest px-3 py-1.5 rounded-xl border border-zinc-700/50 shadow"
                       >
                         Active Focus
                       </motion.div>
@@ -128,7 +128,7 @@ export default function FeatureSelection() {
                   }}
                   className="mt-6 transition-all duration-300 pl-1"
                 >
-                  <h3 className="text-2xl font-black text-zinc-900 tracking-tight mb-2 group-hover:text-black transition-colors">
+                  <h3 className="text-2xl font-light text-zinc-900 tracking-tight mb-2 group-hover:text-black transition-colors">
                     {item.title}
                   </h3>
                   <p className="text-sm text-zinc-500 leading-relaxed max-w-md font-medium">
