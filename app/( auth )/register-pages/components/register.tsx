@@ -1,0 +1,117 @@
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { FcGoogle } from "react-icons/fc";
+import Link from "next/link";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Logo } from "@/components/logo";
+
+const formSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8, "Password must be at least 8 characters long"),
+});
+
+const Register = () => {
+  const form = useForm<z.infer<typeof formSchema>>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    resolver: zodResolver(formSchema),
+  });
+
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
+    console.log(data);
+  };
+
+  return (
+    <div className="flex h-screen items-center justify-center">
+      <div className="grid h-full w-full p-4 lg:grid-cols-2">
+        <div className="m-auto flex w-full max-w-xs flex-col items-center">
+          <Logo className="h-9 w-9" />
+          <p className="mt-4 font-medium text-xl">Log in to Shadcn UI Blocks</p>
+
+          <Button
+            variant="outline"
+            className="mt-8 w-full gap-2.5 rounded-lg h-10 border-border"
+            type="button"
+          >
+            <FcGoogle className="h-5 w-5" />
+            <span>Continue with Google</span>
+          </Button>
+
+          <div className="my-7 flex w-full items-center justify-center overflow-hidden">
+            <Separator />
+            <span className="px-2 text-sm">OR</span>
+            <Separator />
+          </div>
+          <form
+            className="w-full space-y-4"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
+            <Controller
+              control={form.control}
+              name="email"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Email</FieldLabel>
+                  <Input
+                    aria-invalid={fieldState.invalid}
+                    className="w-full"
+                    placeholder="Email"
+                    type="email"
+                    {...field}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
+            <Controller
+              control={form.control}
+              name="password"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Password</FieldLabel>
+                  <Input
+                    aria-invalid={fieldState.invalid}
+                    className="w-full"
+                    placeholder="Password"
+                    type="password"
+                    {...field}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
+            <Button className="mt-4 w-full" type="submit">
+              Continue with Email
+            </Button>
+          </form>
+
+          <div className="mt-5 space-y-5">
+            <Link
+              className="block text-center text-muted-foreground text-sm underline"
+              href="/forgot-pages"
+            >
+              Forgot your password?
+            </Link>
+            <p className="text-center text-sm">
+              Already have an account?
+              <Link className="ml-1 text-muted-foreground underline" href="/login-pages">
+                Log in
+              </Link>
+            </p>
+          </div>
+        </div>
+        <div className="hidden rounded-lg border bg-muted lg:block" />
+      </div>
+    </div>
+  );
+};
+
+export default Register;

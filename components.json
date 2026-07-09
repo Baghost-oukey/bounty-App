@@ -25,6 +25,7 @@
     "@shadcn-space": "https://shadcnspace.com/r/{name}.json",
     "@efferd": "https://efferd.com/r/{name}.json",
     "@aceternity": "https://ui.aceternity.com/registry/{name}.json",
-    "@shadcnblocks": "https://shadcnblocks.com/r/{name}.json"
+    "@shadcnblocks": "https://shadcnblocks.com/r/{name}.json",
+    "@blocks-so": "https://blocks.so/r/{name}.json"
   }
 }
