@@ -33,7 +33,7 @@ const cardsData: CardItem[] = [
             "Rumah bersih tanpa repot! Pesan jasa kebersihan untuk membantu menyapu, mengepel, mencuci, membersihkan kamar mandi, dapur, dan berbagai pekerjaan rumah tangga lainnya dengan mudah.",
         category: "Tenaga Kebersihan",
         image: bersihImages,
-        href: "/layanan/kebersihan",
+        href: "/layanan-bersih",
     },
     {
         id: 2,
@@ -42,7 +42,7 @@ const cardsData: CardItem[] = [
             "Butuh sesuatu tapi tidak ingin keluar rumah? Gunakan layanan jasa titip untuk membeli dan mengantarkan barang yang Anda inginkan dengan cepat dan praktis.",
         category: "Tenaga Jastip",
         image: titipBarang,
-        href: "/layanan/jastip",
+        href: "/layanan-jastip",
     },
     {
         id: 3,
@@ -51,7 +51,7 @@ const cardsData: CardItem[] = [
             "Layanan Antar Jemput menyediakan jasa transportasi dan pengantaran untuk membantu mobilitas Anda, mulai dari mengantar makanan, barang, hingga mengantar penumpang ke tujuan dengan aman dan nyaman.",
         category: "Tenaga Antar Jemput",
         image: antarJemput,
-        href: "/layanan/antar-jemput",
+        href: "/layanan-antar-jemput",
     },
     {
         id: 4,
@@ -60,7 +60,7 @@ const cardsData: CardItem[] = [
             "Layanan Tenaga Kerja membantu Anda menemukan tenaga kerja yang sesuai untuk berbagai kebutuhan, mulai dari pekerjaan harian, bantuan proyek, hingga pekerjaan khusus dengan mudah dan terpercaya.",
         category: "Tenaga Kerja",
         image: tenagaKerja,
-        href: "/layanan/tenaga-kerja",
+        href: "/layanan-tenaga-kerja",
     },
     {
         id: 5,
@@ -69,7 +69,7 @@ const cardsData: CardItem[] = [
             "Layanan Bantuan Digital membantu Anda menemukan tenaga untuk berbagai kebutuhan digital, seperti desain grafis, editing foto dan video, penulisan, pengelolaan media sosial, hingga layanan digital lainnya.",
         category: "Tenaga Bantuan Digital",
         image: bantuanDigital,
-        href: "/layanan/bantuan-digital",
+        href: "/layanan-bantuan-digital",
     },
     {
         id: 6,
@@ -78,7 +78,7 @@ const cardsData: CardItem[] = [
             "Layanan Bimbingan Belajar membantu Anda meningkatkan kemampuan akademik melalui bimbingan dan tutor yang profesional, cocok untuk semua tingkat usia dan kebutuhan belajar.",
         category: "Tenaga Bimbingan Belajar",
         image: bimbinganBelajar,
-        href: "/layanan/bimbingan-belajar",
+        href: "/layanan-bimbingan",
     },
 ];
 
