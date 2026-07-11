@@ -1,8 +1,5 @@
-export function LayananBimbingan() {
-  return (
-    <div>
-      <h1>Layanan Bersih</h1>
-    </div>
-  );
+import FormInput from "./components/formInput";
+
+export default function LayananBimbingan() {
+    return <FormInput />;
 }
-export default LayananBimbingan;

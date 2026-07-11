@@ -1,8 +1,5 @@
-export function LayananTenagaKerja() {
-  return (
-    <div>
-      <h1>Layanan Bersih</h1>
-    </div>
-  );
+import FormInput from "./components/formInput";
+
+export default function LayananTenagaKerja() {
+    return <FormInput />;
 }
-export default LayananTenagaKerja;
