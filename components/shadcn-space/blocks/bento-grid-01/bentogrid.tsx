@@ -35,11 +35,11 @@ const Bentogrid = () => {
                 </div>
                 <div className="flex flex-col gap-0.5 p-8 border-t border-border">
                   <h3 className="text-xl font-bold">
-                    Shopping Assist
+                    Jasa Titip Barang
                   </h3>
                   <p className="text-base font-normal text-muted-foreground">
-                    Titip belanja, membeli makanan, obat, hadiah, atau mengambil
-                    pesanan dengan bantuan komunitas terpercaya.
+                    Titip belanja, beli makanan, obat, hadiah, atau ambil pesanan
+                    — kurir terdekat siap membantu dengan cepat.
                   </p>
                 </div>
               </div>

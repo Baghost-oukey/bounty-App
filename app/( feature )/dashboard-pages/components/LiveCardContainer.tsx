@@ -22,21 +22,21 @@ export default function LiveStats() {
     const stats = [
         {
             icon: <Users className="w-5 h-5 text-blue-500" />,
-            label: "Pekerja online",
+            label: "Pengguna Online",
             value: online.toLocaleString("id-ID"),
             sub: "Siap mengambil bounty",
             bg: "bg-blue-50 dark:bg-blue-950/20",
         },
         {
             icon: <ListChecks className="w-5 h-5 text-amber-500" />,
-            label: "Bounty aktif",
+            label: "Permintaan Bounty",
             value: bounty.toLocaleString("id-ID"),
             sub: "Menunggu pekerja",
             bg: "bg-amber-50 dark:bg-amber-950/20",
         },
         {
             icon: <CheckCircle2 className="w-5 h-5 text-green-500" />,
-            label: "Tugas selesai hari ini",
+            label: "selesai hari ini",
             value: selesai.toLocaleString("id-ID"),
             sub: "Berhasil diselesaikan",
             bg: "bg-green-50 dark:bg-green-950/20",
@@ -53,7 +53,7 @@ export default function LiveStats() {
     return (
         <div className="bg-background border border-border/50 rounded-3xl p-5 flex flex-col gap-4">
             <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-foreground">Statistik Live</h3>
+                <h3 className="text-sm font-bold text-foreground">Informasi Pengguna</h3>
                 <div className="flex items-center gap-1.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
                     <span className="text-[10px] font-semibold text-green-600">Langsung</span>
@@ -71,7 +71,7 @@ export default function LiveStats() {
                         </div>
                         <div>
                             <p className="text-lg font-bold text-foreground leading-none">{s.value}</p>
-                            <p className="text-[10px] text-muted-foreground mt-1">{s.label}</p>
+                            <p className="text-xs font-semibold text-blue-600 mt-1">{s.label}</p>
                             <p className="text-[9px] text-muted-foreground/60">{s.sub}</p>
                         </div>
                     </div>

@@ -6,7 +6,7 @@ export default function QuickActions() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Ajukan Bounty — blue-500 */}
             <Link
-                href="/dashboard"
+                href="/order-pages"
                 className="group flex flex-col justify-between bg-blue-500 hover:bg-blue-600 text-white rounded-3xl p-5 transition-all min-h-[140px]"
             >
                 <div className="w-9 h-9 rounded-2xl bg-white/20 flex items-center justify-center">

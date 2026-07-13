@@ -1,8 +1,8 @@
-import IncomeTracker from "./components/IncomeTracker";
-import QuickActions  from "./components/QuickActions";
-import RecentBounty  from "./components/RecentBounty";
-import LiveStats     from "./components/LiveStats";
-import UserStats     from "./components/UserStats";
+import IncomeTracker from "./components/StatistikPendapatan";
+import QuickActions  from "./components/CardPilih";
+import RecentBounty  from "./components/HistoryBounty";
+import LiveStats     from "./components/LiveCardContainer";
+import UserStats     from "./components/ModalHeader";
 
 export default function DashboardPage() {
     return (

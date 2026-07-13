@@ -1,56 +1,50 @@
 import { InfiniteSlider } from "@/components/infinite-slider";
+import {
+    Sparkles,
+    Car,
+    ShoppingBag,
+    Hammer,
+    Monitor,
+    BookOpen,
+    PawPrint,
+    ChefHat,
+    Wrench,
+    PackageOpen,
+    Palette,
+    Camera,
+} from "lucide-react";
+
+const LAYANAN = [
+    { icon: Sparkles,    label: "Bersih-Bersih"     },
+    { icon: Car,         label: "Antar Jemput"       },
+    { icon: ShoppingBag, label: "Jasa Titip"         },
+    { icon: Hammer,      label: "Tenaga Kerja"       },
+    { icon: Monitor,     label: "Bantuan Digital"    },
+    { icon: BookOpen,    label: "Bimbingan Belajar"  },
+    { icon: PawPrint,    label: "Perawatan Hewan"    },
+    { icon: ChefHat,     label: "Jasa Masak"         },
+    { icon: Wrench,      label: "Perbaikan Rumah"    },
+    { icon: PackageOpen, label: "Packing & Moving"   },
+    { icon: Palette,     label: "Desain Grafis"      },
+    { icon: Camera,      label: "Fotografi"          },
+];
 
 export function LogoCloud() {
-	return (
-		<div className="mask-[linear-gradient(to_right,transparent,black,transparent)] overflow-hidden py-4">
-			<InfiniteSlider gap={42} reverse speed={80} speedOnHover={25}>
-				{logos.map((logo) => (
-					<img
-						alt={logo.alt}
-						className="pointer-events-none h-4 select-none md:h-5 dark:brightness-0 dark:invert"
-						height="auto"
-						key={`logo-${logo.alt}`}
-						loading="lazy"
-						src={logo.src}
-						width="auto"
-					/>
-				))}
-			</InfiniteSlider>
-		</div>
-	);
+    return (
+        <div className="overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
+            <InfiniteSlider gap={10} speed={40} speedOnHover={15}>
+                {LAYANAN.map(({ icon: Icon, label }) => (
+                    <div
+                        key={label}
+                        className="flex items-center gap-3 px-5 py-3 rounded-full border border-border/60 bg-background select-none whitespace-nowrap"
+                    >
+                        <Icon className="w-5 h-5 text-blue-600 shrink-0" strokeWidth={2} />
+                        <span className="text-base font-medium text-foreground/80 tracking-tight">
+                            {label}
+                        </span>
+                    </div>
+                ))}
+            </InfiniteSlider>
+        </div>
+    );
 }
-
-const logos = [
-	{
-		src: "https://storage.efferd.com/logo/nvidia-wordmark.svg",
-		alt: "Nvidia Logo",
-	},
-	{
-		src: "https://storage.efferd.com/logo/supabase-wordmark.svg",
-		alt: "Supabase Logo",
-	},
-	{
-		src: "https://storage.efferd.com/logo/openai-wordmark.svg",
-		alt: "OpenAI Logo",
-	},
-	{
-		src: "https://storage.efferd.com/logo/turso-wordmark.svg",
-		alt: "Turso Logo",
-	},
-	{
-		src: "https://storage.efferd.com/logo/vercel-wordmark.svg",
-		alt: "Vercel Logo",
-	},
-	{
-		src: "https://storage.efferd.com/logo/github-wordmark.svg",
-		alt: "GitHub Logo",
-	},
-	{
-		src: "https://storage.efferd.com/logo/claude-wordmark.svg",
-		alt: "Claude AI Logo",
-	},
-	{
-		src: "https://storage.efferd.com/logo/clerk-wordmark.svg",
-		alt: "Clerk Logo",
-	},
-];

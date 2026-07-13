@@ -42,12 +42,9 @@ export default function IncomeTracker() {
             {/* ── Header ── */}
             <div className="flex items-start justify-between gap-4">
                 <div>
-                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                        Pendapatan
-                    </p>
-                    <h2 className="text-xl font-bold text-foreground tracking-tight">Income Tracker</h2>
-                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed max-w-[220px]">
-                        Pantau pendapatan dari setiap bounty yang selesai.
+                    <h2 className="text-xl font-bold text-foreground tracking-tight">Aktivitas Mu</h2>
+                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed max-w-[500px]">
+                        Nominal yang sudah kamu kerjakan untuk menyelesaikan masalah nih. dan akan di reset setiap minggunya
                     </p>
                 </div>
                 <span className="shrink-0 bg-muted/60 border border-border/50 rounded-full px-3 py-1.5 text-xs font-semibold text-foreground cursor-pointer hover:bg-muted transition-colors select-none">

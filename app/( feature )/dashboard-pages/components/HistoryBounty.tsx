@@ -52,9 +52,7 @@ export default function RecentBounty() {
                     const cfg = STATUS_CONFIG[b.status] ?? STATUS_CONFIG["TERBUKA"];
                     return (
                         <div key={b.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-                            <div className="w-9 h-9 rounded-2xl bg-muted flex items-center justify-center shrink-0 text-base">
-                                {b.layanan === "Kebersihan" ? "🧹" : b.layanan === "Antar Jemput" ? "🚗" : "💻"}
-                            </div>
+                      
                             <div className="flex-1 min-w-0">
                                 <p className="text-xs font-semibold text-foreground truncate">{b.judul}</p>
                                 <p className="text-[10px] text-muted-foreground mt-0.5">{b.waktu}</p>
