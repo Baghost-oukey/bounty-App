@@ -1,13 +1,403 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// Generator ───────────────────────────────────────────────────────────────
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../lib/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
+
+// Enums ───────────────────────────────────────────────────────────────────
+
+enum StatusAkun {
+  AKTIF
+  NONAKTIF
+  DIBLOKIR
+}
+
+enum StatusAdmin {
+  AKTIF
+  NONAKTIF
+}
+
+enum JenisKelamin {
+  LAKI_LAKI
+  PEREMPUAN
+  LAINNYA
+}
+
+enum StatusPengajuan {
+  MENUNGGU
+  DISETUJUI
+  DITOLAK
+}
+
+enum StatusVerifikasi {
+  BELUM_TERVERIFIKASI
+  TERVERIFIKASI
+  DITANGGUHKAN
+}
+
+enum StatusTugas {
+  TERBUKA      // bounty aktif, menunggu pekerja
+  DIAMBIL      // pekerja sudah mengambil bounty
+  BERJALAN     // sedang dikerjakan
+  SELESAI      // pekerjaan selesai
+  DIBATALKAN   // dibatalkan
+  SENGKETA     // ada perselisihan
+}
+
+enum StatusPembayaran {
+  MENUNGGU
+  BERHASIL
+  GAGAL
+  DIKEMBALIKAN
+}
+
+enum MetodePembayaran {
+  TRANSFER_BANK
+  DOMPET_DIGITAL
+  TUNAI
+}
+
+enum JenisTransaksi {
+  PENDAPATAN
+  PENARIKAN
+  REFUND
+  BONUS
+}
+
+enum StatusAlamat {
+  AKTIF
+  DIHAPUS
+}
+
+enum StatusLayanan {
+  AKTIF
+  NONAKTIF
+}
+
+// Admin ───────────────────────────────────────────────────────────────────
+
+model Admin {
+  id            String      @id @default(cuid())
+  username      String      @unique
+  password      String
+  namaAdmin     String      @map("nama_admin")
+  email         String      @unique
+  status        StatusAdmin @default(AKTIF)
+  terakhirLogin DateTime?   @map("terakhir_login")
+  dibuatPada    DateTime    @default(now()) @map("dibuat_pada")
+  diubahPada    DateTime    @updatedAt @map("diubah_pada")
+
+  @@map("admin")
+}
+
+// Pengguna ─────────────────────────────────────────────────────────────────
+
+model Pengguna {
+  id                   String     @id @default(cuid())
+  username             String     @unique
+  email                String     @unique
+  nomorHp              String?    @unique @map("nomor_hp")
+  password             String
+  statusAkun           StatusAkun @default(AKTIF) @map("status_akun")
+  emailTerverifikasi   Boolean    @default(false) @map("email_terverifikasi")
+  nomorHpTerverifikasi Boolean    @default(false) @map("nomor_hp_terverifikasi")
+  terakhirLogin        DateTime?  @map("terakhir_login")
+  dibuatPada           DateTime   @default(now()) @map("dibuat_pada")
+  diubahPada           DateTime   @updatedAt @map("diubah_pada")
+
+  profil           Profil?
+  alamat           Alamat[]
+  pengajuanPekerja PengajuanPekerja?
+  pekerja          Pekerja?
+  tugas            Tugas[]           @relation("TugasPengguna")
+  penilaian        Penilaian[]       @relation("PenilaianOlehPengguna")
+  trustScore       TrustScore?
+
+  @@map("pengguna")
+}
+
+// Profil ─────────────────────────────────────────────────────────────────
+
+model Profil {
+  id           String        @id @default(cuid())
+  idPengguna   String        @unique @map("id_pengguna")
+  namaLengkap  String        @map("nama_lengkap")
+  fotoProfil   String?       @map("foto_profil")
+  jenisKelamin JenisKelamin? @map("jenis_kelamin")
+  tanggalLahir DateTime?     @map("tanggal_lahir")
+  dibuatPada   DateTime      @default(now()) @map("dibuat_pada")
+  diubahPada   DateTime      @updatedAt @map("diubah_pada")
+
+  pengguna Pengguna @relation(fields: [idPengguna], references: [id], onDelete: Cascade)
+
+  @@map("profil")
+}
+
+// Alamat ─────────────────────────────────────────────────────────────────
+
+model Alamat {
+  id            String       @id @default(cuid())
+  idPengguna    String       @map("id_pengguna")
+  labelAlamat   String       @map("label_alamat")
+  provinsi      String
+  kabupaten     String
+  kecamatan     String
+  kelurahan     String
+  kodePos       String?      @map("kode_pos")
+  alamatLengkap String       @map("alamat_lengkap")
+  latitude      Float
+  longitude     Float
+  catatan       String?
+  alamatUtama   Boolean      @default(false) @map("alamat_utama")
+  statusAlamat  StatusAlamat @default(AKTIF) @map("status_alamat")
+  dibuatPada    DateTime     @default(now()) @map("dibuat_pada")
+  diubahPada    DateTime     @updatedAt @map("diubah_pada")
+
+  pengguna Pengguna @relation(fields: [idPengguna], references: [id], onDelete: Cascade)
+  tugas    Tugas[]
+
+  @@index([idPengguna])
+  @@map("alamat")
+}
+
+// Pengajuan Pekerja ────────────────────────────────────────────────────────
+
+model PengajuanPekerja {
+  id              String          @id @default(cuid())
+  idPengguna      String          @unique @map("id_pengguna")
+  fotoIdentitas   String          @map("foto_identitas")
+  fotoSelfie      String          @map("foto_selfie")
+  deskripsiDiri   String?         @map("deskripsi_diri")
+  pengalaman      String?
+  statusPengajuan StatusPengajuan @default(MENUNGGU) @map("status_pengajuan")
+  catatanAdmin    String?         @map("catatan_admin")
+  dibuatPada      DateTime        @default(now()) @map("dibuat_pada")
+  diprosesOada    DateTime?       @map("diproses_pada")
+
+  pengguna Pengguna @relation(fields: [idPengguna], references: [id], onDelete: Cascade)
+
+  @@map("pengajuan_pekerja")
+}
+
+// Pekerja ────────────────────────────────────────────────────────────────
+
+model Pekerja {
+  id                 String           @id @default(cuid())
+  idPengguna         String           @unique @map("id_pengguna")
+  rating             Float            @default(0)
+  jumlahTugasSelesai Int              @default(0) @map("jumlah_tugas_selesai")
+  statusVerifikasi   StatusVerifikasi @default(BELUM_TERVERIFIKASI) @map("status_verifikasi")
+  statusOnline       Boolean          @default(false) @map("status_online")
+  dibuatPada         DateTime         @default(now()) @map("dibuat_pada")
+  diubahPada         DateTime         @updatedAt @map("diubah_pada")
+
+  pengguna     Pengguna       @relation(fields: [idPengguna], references: [id], onDelete: Cascade)
+  dompet       DompetPekerja?
+  tugasDiambil Tugas[]        @relation("TugasDiambilPekerja")
+  penilaian    Penilaian[]    @relation("PenilaianUntukPekerja")
+
+  @@map("pekerja")
+}
+
+// Dompet Pekerja ─────────────────────────────────────────────────────────
+
+model DompetPekerja {
+  id              String   @id @default(cuid())
+  idPekerja       String   @unique @map("id_pekerja")
+  saldo           Int      @default(0)
+  totalPendapatan Int      @default(0) @map("total_pendapatan")
+  totalPenarikan  Int      @default(0) @map("total_penarikan")
+  dibuatPada      DateTime @default(now()) @map("dibuat_pada")
+  diubahPada      DateTime @updatedAt @map("diubah_pada")
+
+  pekerja      Pekerja        @relation(fields: [idPekerja], references: [id], onDelete: Cascade)
+  riwayatSaldo RiwayatSaldo[]
+
+  @@map("dompet_pekerja")
+}
+
+// Riwayat Saldo ──────────────────────────────────────────────────────────
+
+model RiwayatSaldo {
+  id             String         @id @default(cuid())
+  idDompet       String         @map("id_dompet")
+  idTugas        String?        @map("id_tugas")
+  jenisTransaksi JenisTransaksi @map("jenis_transaksi")
+  nominal        Int
+  saldoSebelum   Int            @map("saldo_sebelum")
+  saldoSesudah   Int            @map("saldo_sesudah")
+  keterangan     String?
+  dibuatPada     DateTime       @default(now()) @map("dibuat_pada")
+
+  dompet DompetPekerja @relation(fields: [idDompet], references: [id], onDelete: Cascade)
+  tugas  Tugas?        @relation(fields: [idTugas], references: [id], onDelete: SetNull)
+
+  @@index([idDompet])
+  @@map("riwayat_saldo")
+}
+
+// Layanan ──────────────────────────────────────────────────────────────────
+
+model Layanan {
+  id          String        @id @default(cuid())
+  namaLayanan String        @map("nama_layanan")
+  ikon        String?
+  deskripsi   String?
+  status      StatusLayanan @default(AKTIF)
+  dibuatPada  DateTime      @default(now()) @map("dibuat_pada")
+
+  jenisLayanan JenisLayanan[]
+
+  @@map("layanan")
+}
+
+// Jenis Layanan ────────────────────────────────────────────────────────────
+
+model JenisLayanan {
+  id         String   @id @default(cuid())
+  idLayanan  String   @map("id_layanan")
+  namaJenis  String   @map("nama_jenis")
+  deskripsi  String?
+  dibuatPada DateTime @default(now()) @map("dibuat_pada")
+
+  layanan Layanan @relation(fields: [idLayanan], references: [id], onDelete: Cascade)
+  tugas   Tugas[]
+
+  @@index([idLayanan])
+  @@map("jenis_layanan")
+}
+
+// Tugas ──────────────────────────────────────────────────────────────────
+
+model Tugas {
+  id                String      @id @default(cuid())
+  kodeTugas         String      @unique @map("kode_tugas")
+  idPengguna        String      @map("id_pengguna")
+  idPekerja         String?     @map("id_pekerja")
+  idAlamat          String      @map("id_alamat")
+  idJenisLayanan    String      @map("id_jenis_layanan")
+  judul             String
+  deskripsi         String?
+  anggaran          Int                        // budget user dalam IDR
+  hargaDisepakati   Int?        @map("harga_disepakati")
+  tanggalPengerjaan DateTime    @map("tanggal_pengerjaan")
+  jamPengerjaan     String      @map("jam_pengerjaan")
+  statusTugas       StatusTugas @default(TERBUKA) @map("status_tugas")
+  mulaiPada         DateTime?   @map("mulai_pada")
+  selesaiPada       DateTime?   @map("selesai_pada")
+  dibuatPada        DateTime    @default(now()) @map("dibuat_pada")
+  diubahPada        DateTime    @updatedAt @map("diubah_pada")
+
+  pengguna      Pengguna       @relation("TugasPengguna", fields: [idPengguna], references: [id])
+  pekerja       Pekerja?       @relation("TugasDiambilPekerja", fields: [idPekerja], references: [id])
+  alamat        Alamat         @relation(fields: [idAlamat], references: [id])
+  jenisLayanan  JenisLayanan   @relation(fields: [idJenisLayanan], references: [id])
+  pembayaran    Pembayaran?
+  penilaian     Penilaian?
+  ruangChat     RuangChat?
+  riwayatStatus RiwayatStatus[]
+  riwayatSaldo  RiwayatSaldo[]
+
+  @@index([idPengguna])
+  @@index([idPekerja])
+  @@index([statusTugas])
+  @@index([tanggalPengerjaan])
+  @@map("tugas")
+}
+
+// Pembayaran ───────────────────────────────────────────────────────────────
+
+model Pembayaran {
+  id               String           @id @default(cuid())
+  idTugas          String           @unique @map("id_tugas")
+  nominal          Int
+  metodePembayaran MetodePembayaran @map("metode_pembayaran")
+  statusPembayaran StatusPembayaran @default(MENUNGGU) @map("status_pembayaran")
+  buktiPembayaran  String?          @map("bukti_pembayaran")
+  dibayarPada      DateTime?        @map("dibayar_pada")
+
+  tugas Tugas @relation(fields: [idTugas], references: [id], onDelete: Cascade)
+
+  @@map("pembayaran")
+}
+
+// Penilaian ────────────────────────────────────────────────────────────────
+
+model Penilaian {
+  id         String   @id @default(cuid())
+  idTugas    String   @unique @map("id_tugas")
+  idPengguna String   @map("id_pengguna")
+  idPekerja  String   @map("id_pekerja")
+  nilai      Int      // 1–5
+  ulasan     String?
+  dibuatPada DateTime @default(now()) @map("dibuat_pada")
+
+  tugas    Tugas    @relation(fields: [idTugas], references: [id], onDelete: Cascade)
+  pengguna Pengguna @relation("PenilaianOlehPengguna", fields: [idPengguna], references: [id])
+  pekerja  Pekerja  @relation("PenilaianUntukPekerja", fields: [idPekerja], references: [id])
+
+  @@index([idPekerja])
+  @@map("penilaian")
+}
+
+// Ruang Chat ───────────────────────────────────────────────────────────────
+
+model RuangChat {
+  id         String   @id @default(cuid())
+  idTugas    String   @unique @map("id_tugas")
+  dibuatPada DateTime @default(now()) @map("dibuat_pada")
+
+  tugas Tugas   @relation(fields: [idTugas], references: [id], onDelete: Cascade)
+  pesan Pesan[]
+
+  @@map("ruang_chat")
+}
+
+model Pesan {
+  id          String   @id @default(cuid())
+  idRuangChat String   @map("id_ruang_chat")
+  idPengirim  String   @map("id_pengirim") // cuid pengguna atau pekerja
+  isiPesan    String   @map("isi_pesan")
+  sudahDibaca Boolean  @default(false) @map("sudah_dibaca")
+  dibuatPada  DateTime @default(now()) @map("dibuat_pada")
+
+  ruangChat RuangChat @relation(fields: [idRuangChat], references: [id], onDelete: Cascade)
+
+  @@index([idRuangChat])
+  @@map("pesan")
+}
+
+// Riwayat Status ─────────────────────────────────────────────────────────
+
+model RiwayatStatus {
+  id         String      @id @default(cuid())
+  idTugas    String      @map("id_tugas")
+  status     StatusTugas
+  keterangan String?
+  dibuatPada DateTime    @default(now()) @map("dibuat_pada")
+
+  tugas Tugas @relation(fields: [idTugas], references: [id], onDelete: Cascade)
+
+  @@index([idTugas])
+  @@map("riwayat_status")
+}
+
+// Trust Score ────────────────────────────────────────────────────────────
+
+model TrustScore {
+  id                 String   @id @default(cuid())
+  idPengguna         String   @unique @map("id_pengguna")
+  nilai              Int      @default(100)
+  jumlahStrike       Int      @default(0) @map("jumlah_strike")
+  terakhirDiperbarui DateTime @default(now()) @updatedAt @map("terakhir_diperbarui")
+
+  pengguna Pengguna @relation(fields: [idPengguna], references: [id], onDelete: Cascade)
+
+  @@map("trust_score")
+}
+

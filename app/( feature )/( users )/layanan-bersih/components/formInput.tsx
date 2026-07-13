@@ -69,7 +69,15 @@ export default function FormInput() {
                     setTimeout(() => window.dispatchEvent(new Event("map:collapse-sheet")), 300);
                 }}
             >
-                {mapReady && <MapView lat={DEFAULT_LAT} lng={DEFAULT_LNG} address={DEFAULT_ADDRESS} />}
+                {mapReady && (
+                    <MapView
+                        lat={DEFAULT_LAT}
+                        lng={DEFAULT_LNG}
+                        address={DEFAULT_ADDRESS}
+                        bountyActive={step === "done"}
+                        bountyLabel={selectedLabels.slice(0, 2).join(", ")}
+                    />
+                )}
             </div>
 
             {/* Desktop: floating nav */}

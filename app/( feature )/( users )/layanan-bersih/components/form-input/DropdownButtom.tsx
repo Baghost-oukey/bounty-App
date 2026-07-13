@@ -62,6 +62,13 @@ export default function BottomSheet(props: Props) {
         return () => window.removeEventListener("map:collapse-sheet", handler);
     }, [isPeek]);
 
+    // Auto-collapse to peek when bounty is posted
+    useEffect(() => {
+        if (props.step === "done") {
+            setTimeout(() => setSheetHeight(SNAP_PEEK), 600);
+        }
+    }, [props.step]);
+
     return (
         <div
             className="lg:hidden absolute left-0 right-0 bottom-0 z-[1000] flex flex-col rounded-t-3xl bg-background shadow-2xl border-t border-x border-border/20 overflow-hidden"
