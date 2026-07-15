@@ -112,7 +112,7 @@ export default function MapView({ lat, lng, address, bountyActive = false, bount
                     <Popup>
                         <div style={{ minWidth: 160 }}>
                             <p style={{ fontSize: 11, fontWeight: 700, color: "#ea580c", marginBottom: 2 }}>
-                                🧹 Bounty Aktif
+                                 Bounty Aktif
                             </p>
                             <p style={{ fontSize: 11, color: "#374151", marginBottom: 2 }}>{address}</p>
                             {bountyLabel && (

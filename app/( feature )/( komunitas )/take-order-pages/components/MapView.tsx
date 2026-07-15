@@ -50,7 +50,7 @@ export interface BountyMarker {
     id: string;
     lat: number;
     lng: number;
-    emoji: string;
+    emoji?: string;
     layanan: string;
     tugas: string;
     lokasi: string;

@@ -23,7 +23,7 @@ export default function QuickActions() {
 
             {/* Ambil Bounty — blue-700 */}
             <Link
-                href="/bounty"
+                href="/take-order-pages"
                 className="group flex flex-col justify-between bg-blue-700 hover:bg-blue-800 text-white rounded-3xl p-5 transition-all min-h-[140px]"
             >
                 <div className="w-9 h-9 rounded-2xl bg-white/20 flex items-center justify-center">

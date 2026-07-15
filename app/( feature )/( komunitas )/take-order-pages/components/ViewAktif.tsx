@@ -11,8 +11,8 @@ const STATUS_AKTIF: Record<AktifStatus, { label: string; color: string; bg: stri
 };
 
 const AKTIF = [
-    { id: "A001", emoji: "🧹", layanan: "Bersih-Bersih", tugas: "Sapu & Pel, Kamar Mandi, Dapur",  pemesan: "Siti Rahayu",  lokasi: "Kuningan, Jaksel",  mulai: "14:05", estimasi: "16:00", budget: 85000,  status: "BERJALAN" as AktifStatus,       progres: 35 },
-    { id: "A002", emoji: "🛍️", layanan: "Jasa Titip",    tugas: "Beli obat apotek + snack",         pemesan: "Budi Santoso", lokasi: "Pancoran, Jaksel",  mulai: "16:20", estimasi: "17:00", budget: 30000,  status: "MENUJU"   as AktifStatus,       progres: 15 },
+    { id: "A001", layanan: "Bersih-Bersih", tugas: "Sapu & Pel, Kamar Mandi, Dapur",  pemesan: "Siti Rahayu",  lokasi: "Kuningan, Jaksel",  mulai: "14:05", estimasi: "16:00", budget: 85000,  status: "BERJALAN" as AktifStatus,       progres: 35 },
+    { id: "A002", layanan: "Jasa Titip",    tugas: "Beli obat apotek + snack",         pemesan: "Budi Santoso", lokasi: "Pancoran, Jaksel",  mulai: "16:20", estimasi: "17:00", budget: 30000,  status: "MENUJU"   as AktifStatus,       progres: 15 },
 ];
 
 const formatRupiah = (v: number) =>
@@ -37,7 +37,6 @@ export default function ViewAktif() {
                         <div key={b.id} className="bg-background border border-border/50 rounded-2xl overflow-hidden">
                             {/* Top */}
                             <div className="px-4 pt-4 pb-3 flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-xl shrink-0">{b.emoji}</div>
                                 <div className="flex-1 min-w-0">
                                     <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-md">{b.layanan}</span>
                                     <p className="text-sm font-bold text-foreground mt-0.5 truncate">{b.tugas}</p>
