@@ -2,12 +2,12 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { ChevronUp } from "lucide-react";
-import type { SidebarView } from "../Sidebar";
+import type { SidebarView } from "./Sidebar";
 import FloatingBountyCard from "./ContainerMainModal";
 
 // Two snap points: expanded (form visible) and peek (just handle + title)
 const SNAP_EXPANDED = 0.82;
-const SNAP_PEEK     = 0.12;
+const SNAP_PEEK = 0.12;
 
 interface Props {
     view: SidebarView;
@@ -16,7 +16,7 @@ interface Props {
 
 export default function MobileBottomSheet({ view, onViewChange }: Props) {
     const [sheetHeight, setSheetHeight] = useState(SNAP_EXPANDED);
-    const [isDragging,  setIsDragging]  = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
     const dragStartY = useRef(0);
     const dragStartH = useRef(SNAP_EXPANDED);
 
@@ -47,9 +47,9 @@ export default function MobileBottomSheet({ view, onViewChange }: Props) {
     useEffect(() => {
         if (!isDragging) return;
         const move = (e: MouseEvent) => onDragMove(e.clientY);
-        const up   = (e: MouseEvent) => onDragEnd(e.clientY);
+        const up = (e: MouseEvent) => onDragEnd(e.clientY);
         window.addEventListener("mousemove", move);
-        window.addEventListener("mouseup",   up);
+        window.addEventListener("mouseup", up);
         return () => { window.removeEventListener("mousemove", move); window.removeEventListener("mouseup", up); };
     }, [isDragging, onDragMove, onDragEnd]);
 
@@ -66,11 +66,11 @@ export default function MobileBottomSheet({ view, onViewChange }: Props) {
     }, [view]);
 
     const TITLE_MAP: Record<SidebarView, string> = {
-        bounty:  "Ambil Bounty",
-        aktif:   "Bounty Aktif",
-        stats:   "Statistik Saya",
+        bounty: "Ambil Bounty",
+        aktif: "Bounty Aktif",
+        stats: "Statistik Saya",
         history: "Riwayat Tugas",
-        chat:    "Pesan",
+        chat: "Pesan",
     };
 
     return (
@@ -87,8 +87,8 @@ export default function MobileBottomSheet({ view, onViewChange }: Props) {
                 className="shrink-0 cursor-grab active:cursor-grabbing touch-none select-none"
                 onMouseDown={(e) => onDragStart(e.clientY)}
                 onTouchStart={(e) => onDragStart(e.touches[0].clientY)}
-                onTouchMove={(e)  => onDragMove(e.touches[0].clientY)}
-                onTouchEnd={(e)   => onDragEnd(e.changedTouches[0].clientY)}
+                onTouchMove={(e) => onDragMove(e.touches[0].clientY)}
+                onTouchEnd={(e) => onDragEnd(e.changedTouches[0].clientY)}
                 onClick={() => { if (isPeek) setSheetHeight(SNAP_EXPANDED); }}
             >
                 <div className="flex justify-center pt-3 pb-2">

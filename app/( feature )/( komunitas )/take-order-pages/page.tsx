@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import IconSidebar, { type SidebarView } from "./components/Sidebar";
 import FloatingBountyCard from "./components/tampilan-mobile/ContainerMainModal";
-import MobileBottomSheet from "./components/tampilan-mobile/MobileBottomSheet";
+import MobileBottomSheet from "./components/MobileBottomSheet";
 import MobileNavBar from "./components/tampilan-mobile/MobileNavBar";
 import type { BountyMarker } from "./components/MapView";
 
