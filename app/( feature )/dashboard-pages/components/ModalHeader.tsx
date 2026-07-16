@@ -5,10 +5,10 @@ const formatRupiah = (val: number) =>
 
 // Mock user stats — replace with real data from DB later
 const STATS = [
-    { icon: <CheckCircle2 className="w-4 h-4 text-green-500" />, label: "Bounty selesai",    value: "12" },
-    { icon: <Zap className="w-4 h-4 text-blue-500" />,          label: "Bounty diambil",     value: "5" },
-    { icon: <Star className="w-4 h-4 text-amber-500" />,        label: "Rating kamu",        value: "4.9" },
-    { icon: <TrendingUp className="w-4 h-4 text-purple-500" />, label: "Total pendapatan",   value: formatRupiah(1_250_000) },
+    { icon: <CheckCircle2 className="w-4 h-4 text-green-500" />, label: "Bounty selesai", value: "12" },
+    { icon: <Zap className="w-4 h-4 text-blue-500" />, label: "Bounty diambil", value: "5" },
+    { icon: <Star className="w-4 h-4 text-amber-500" />, label: "Rating kamu", value: "4.9" },
+    { icon: <TrendingUp className="w-4 h-4 text-purple-500" />, label: "Total pendapatan", value: formatRupiah(1_250_000) },
 ];
 
 export default function UserStats({ name = "Ahmad Fauzi" }: { name?: string }) {

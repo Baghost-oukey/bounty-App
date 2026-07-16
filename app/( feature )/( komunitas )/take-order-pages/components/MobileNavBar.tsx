@@ -1,7 +1,7 @@
 "use client";
 
 import { ListChecks, BarChart2, Clock, MessageCircle, Zap } from "lucide-react";
-import type { SidebarView } from "../Sidebar";
+import type { SidebarView } from "./Sidebar";
 
 const TABS: { view: SidebarView; icon: React.ElementType; label: string }[] = [
     { view: "bounty",  icon: ListChecks,    label: "Bounty"  },

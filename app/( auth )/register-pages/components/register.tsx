@@ -11,12 +11,15 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Logo } from "@/components/logo";
 
+import { createClient } from "@/utils/supabase/client";
+
 const formSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8, "Password must be at least 8 characters long"),
 });
 
 const Register = () => {
+  const supabase = createClient();
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
       email: "",
@@ -27,6 +30,15 @@ const Register = () => {
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     console.log(data);
+  };
+
+  const handleGoogleLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
   };
 
   return (
@@ -40,6 +52,7 @@ const Register = () => {
             variant="outline"
             className="mt-8 w-full gap-2.5 rounded-lg h-10 border-border"
             type="button"
+            onClick={handleGoogleLogin}
           >
             <FcGoogle className="h-5 w-5" />
             <span>Continue with Google</span>

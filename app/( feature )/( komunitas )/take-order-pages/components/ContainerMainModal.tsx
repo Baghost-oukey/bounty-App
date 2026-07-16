@@ -1,11 +1,11 @@
-﻿"use client";
+"use client";
 
-import type { SidebarView } from "../Sidebar";
-import ViewBounty  from "../modal-menu/DaftarBountyTersedia";
-import ViewAktif   from "../ViewAktif";
-import ViewStats   from "../modal-menu/StatustikMenu";
-import ViewHistory from "../modal-menu/HistoryMenu";
-import ViewChat    from "../modal-menu/ChatMenu";
+import type { SidebarView } from "./Sidebar";
+import ViewBounty  from "./modal-menu/DaftarBountyTersedia";
+import ViewAktif   from "./ViewAktif";
+import ViewStats   from "./modal-menu/StatustikMenu";
+import ViewHistory from "./modal-menu/HistoryMenu";
+import ViewChat    from "./modal-menu/ChatMenu";
 
 // ── Title map ─────────────────────────────────────────────
 
