@@ -1,10 +1,30 @@
+import { createClient } from "@/utils/supabase/server";
+import { prisma } from "@/lib/prisma";
 import IncomeTracker from "./components/StatistikPendapatan";
 import QuickActions from "./components/CardPilih";
 import RecentBounty from "./components/HistoryBounty";
 import LiveStats from "./components/LiveCardContainer";
 import UserStats from "./components/ModalHeader";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    let name = "Pengguna";
+    if (user) {
+        const dbUser = await prisma.pengguna.findUnique({
+            where: { email: user.email! },
+            include: { profil: true },
+        });
+        if (dbUser?.profil?.namaLengkap) {
+            name = dbUser.profil.namaLengkap;
+        } else if (user.user_metadata?.full_name) {
+            name = user.user_metadata.full_name;
+        } else if (dbUser?.username) {
+            name = dbUser.username;
+        }
+    }
+
     return (
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -15,7 +35,7 @@ export default function DashboardPage() {
                 <div className="lg:col-span-2 flex flex-col gap-5">
 
                     {/* Greeting + stats */}
-                    <UserStats name="Ahmad Fauzi" />
+                    <UserStats name={name} />
 
                     {/* Income tracker */}
                     <IncomeTracker />
