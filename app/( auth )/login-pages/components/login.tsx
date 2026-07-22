@@ -14,6 +14,7 @@ import { Logo } from "@/components/logo";
 import { AlertCircle } from "lucide-react";
 
 import { createClient } from "@/utils/supabase/client";
+import { getProfileStatus } from "@/app/actions/profile";
 
 const formSchema = z.object({
   email: z.string().email("Format email tidak valid"),
@@ -46,7 +47,17 @@ const Login = () => {
       setError(signInError.message || "Gagal masuk. Periksa kembali email dan password Anda.");
       setLoading(false);
     } else {
-      window.location.href = "/dashboard-pages";
+      try {
+        const status = await getProfileStatus();
+        if (status.authenticated && !status.registered) {
+          window.location.href = "/complete-profile";
+        } else {
+          window.location.href = "/dashboard-pages";
+        }
+      } catch (err) {
+        console.error("Error checking profile status during login:", err);
+        window.location.href = "/dashboard-pages";
+      }
     }
   };
 

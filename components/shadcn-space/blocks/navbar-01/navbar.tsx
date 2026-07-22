@@ -109,13 +109,20 @@ const Navbar = () => {
 
                 <DropdownMenuContent
                   align="end"
-                  className="w-56 mt-2"
+                  className="w-56 mt-2 rounded-2xl p-2"
                 >
                   {navigationData.map((item) => (
                     <DropdownMenuItem key={item.title}>
                       <a href={item.href} className="w-full cursor-pointer text-sm font-medium">{item.title}</a>
                     </DropdownMenuItem>
                   ))}
+                  <div className="h-px bg-border my-1.5" />
+                  <DropdownMenuItem>
+                    <Link href="/login-pages" className="w-full cursor-pointer text-sm font-bold text-blue-600 flex items-center justify-between">
+                      Login
+                      <ArrowUpRight size={14} />
+                    </Link>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

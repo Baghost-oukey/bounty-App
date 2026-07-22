@@ -53,12 +53,12 @@ const Register = () => {
     } else {
       // If user session is created immediately (meaning email confirmation is disabled)
       if (signUpData.session) {
-        setSuccess("Registrasi berhasil! Mengalihkan ke dashboard...");
+        setSuccess("Registrasi berhasil! Mengalihkan ke pengisian profil...");
         setTimeout(() => {
-          window.location.href = "/dashboard-pages";
+          window.location.href = "/complete-profile";
         }, 1500);
       } else {
-        setSuccess("Registrasi berhasil! Silakan cek email Anda untuk tautan verifikasi.");
+        setSuccess("Registrasi berhasil! Silakan cek email Anda untuk verifikasi.");
         setLoading(false);
       }
     }

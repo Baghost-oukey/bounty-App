@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ArrowRightIcon, PhoneCallIcon } from "lucide-react";
 import { LogoCloud } from "@/components/logo-cloud";
+import Link from "next/link";
 
 export function HeroSection() {
   return (
@@ -15,7 +16,7 @@ export function HeroSection() {
 
       {/* main content */}
 
-      <div className="relative flex flex-col items-center justify-center gap-5 pt-40 pb-30">
+      <div className="relative flex flex-col items-center justify-center gap-5 pt-40 pb-30 px-4 sm:px-6">
         {/* X Content Faded Borders */}
         <div
           aria-hidden="true"
@@ -43,11 +44,15 @@ export function HeroSection() {
         </p>
 
         <div className="fade-in slide-in-from-bottom-10 flex animate-in flex-row flex-wrap items-center justify-center gap-3 fill-mode-backwards pt-2 delay-300 duration-500 ease-out">
-          <Button className="rounded-full" size="lg" variant="secondary">
-            <PhoneCallIcon data-icon="inline-start" /> Hubungi Kami
+          <Button render={<Link href="/login-pages" />} className="rounded-full cursor-pointer" size="lg" variant="secondary">
+            <span className="flex items-center gap-1.5 cursor-pointer">
+              <PhoneCallIcon data-icon="inline-start" /> Hubungi Kami
+            </span>
           </Button>
-          <Button className="rounded-full" size="lg">
-            Coba Sekarang <ArrowRightIcon data-icon="inline-end" />
+          <Button render={<Link href="/login-pages" />} className="rounded-full cursor-pointer" size="lg">
+            <span className="flex items-center gap-1.5 cursor-pointer">
+              Coba Sekarang <ArrowRightIcon data-icon="inline-end" />
+            </span>
           </Button>
         </div>
       </div>

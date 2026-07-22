@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/lib/prisma";
 import IncomeTracker from "./components/StatistikPendapatan";
@@ -22,25 +23,31 @@ export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  if (!user) {
+    redirect("/login-pages");
+  }
+
+  const dbUser = await prisma.pengguna.findUnique({
+    where: { email: user.email! },
+    include: { 
+      profil: true,
+      pekerja: {
+        include: {
+          dompet: true
+        }
+      }
+    },
+  });
+
+  if (!dbUser || !dbUser.profil) {
+    redirect("/complete-profile");
+  }
+
   let name = "Pengguna";
   let completedCount = 0;
   let activeCount = 0;
   let rating = 5.0;
   let totalIncome = 0;
-  let dbUser = null;
-
-  if (user) {
-    dbUser = await prisma.pengguna.findUnique({
-      where: { email: user.email! },
-      include: { 
-        profil: true,
-        pekerja: {
-          include: {
-            dompet: true
-          }
-        }
-      },
-    });
 
     if (dbUser) {
       if (dbUser.profil?.namaLengkap) {
@@ -74,7 +81,6 @@ export default async function DashboardPage() {
       rating = dbUser.pekerja?.rating || 5.0;
       totalIncome = dbUser.pekerja?.dompet?.totalPendapatan || 0;
     }
-  }
 
   // ── Fetch Weekly Activity Data ──
   const startOfWeek = new Date();
