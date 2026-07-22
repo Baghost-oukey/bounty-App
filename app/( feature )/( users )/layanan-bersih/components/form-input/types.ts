@@ -19,4 +19,8 @@ export interface CardContentProps {
     finalPrice: number;
     canPost: boolean;
     handlePost: () => void;
+    // Dynamic Location & Action Props
+    address?: string;
+    loading?: boolean;
+    onConfirmPost?: () => void;
 }

@@ -12,9 +12,11 @@ const SNAP_PEEK = 0.12;
 interface Props {
     view: SidebarView;
     onViewChange: (v: SidebarView) => void;
+    bounties?: any[];
+    onRefresh?: () => void;
 }
 
-export default function MobileBottomSheet({ view, onViewChange }: Props) {
+export default function MobileBottomSheet({ view, onViewChange, bounties, onRefresh }: Props) {
     const [sheetHeight, setSheetHeight] = useState(SNAP_EXPANDED);
     const [isDragging, setIsDragging] = useState(false);
     const dragStartY = useRef(0);
@@ -126,7 +128,7 @@ export default function MobileBottomSheet({ view, onViewChange }: Props) {
                     pointerEvents: isPeek ? "none" : "auto",
                 }}
             >
-                <FloatingBountyCard view={view} onViewChange={onViewChange} />
+                <FloatingBountyCard view={view} onViewChange={onViewChange} bounties={bounties} onRefresh={onRefresh} />
             </div>
         </div>
     );

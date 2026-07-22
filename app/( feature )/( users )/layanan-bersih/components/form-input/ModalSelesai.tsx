@@ -48,7 +48,7 @@ export default function StepDone({ selectedLabels, date, time, finalPrice }: Pro
                 )}
             </div>
 
-            <Link href="/dashboard" className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+            <Link href="/dashboard-pages" className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors">
                 Kembali ke Dashboard
             </Link>
         </div>

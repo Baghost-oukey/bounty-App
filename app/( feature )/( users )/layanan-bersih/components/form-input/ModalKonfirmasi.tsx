@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ArrowLeft } from "lucide-react";
 import { DEFAULT_ADDRESS, formatDate, formatRupiah } from "./constants";
 
 interface Props {
@@ -12,10 +12,12 @@ interface Props {
     finalPrice: number;
     onBack: () => void;
     onConfirm: () => void;
+    address?: string;
+    loading?: boolean;
 }
 
 export default function StepConfirm({
-    selectedLabels, date, time, description, finalPrice, onBack, onConfirm,
+    selectedLabels, date, time, description, finalPrice, onBack, onConfirm, address, loading,
 }: Props) {
     return (
         <div className="px-5 py-5 space-y-4">
@@ -39,7 +41,7 @@ export default function StepConfirm({
                 </div>
 
                 <Row label="Jadwal" value={`${formatDate(date)}, ${time}`} />
-                <Row label="Lokasi" value={DEFAULT_ADDRESS} />
+                <Row label="Lokasi" value={address || DEFAULT_ADDRESS} />
                 {description && <Row label="Keterangan" value={description} />}
                 {finalPrice > 0 && (
                     <div className="px-4 py-3 flex items-center justify-between">
@@ -54,12 +56,20 @@ export default function StepConfirm({
             </p>
 
             <div className="flex gap-2">
-                <Button variant="outline" onClick={onBack} className="flex-1 h-10 rounded-2xl text-xs font-semibold">
+                <Button variant="outline" disabled={loading} onClick={onBack} className="flex-1 h-10 rounded-2xl text-xs font-semibold">
                     Ubah
                 </Button>
-                <Button onClick={onConfirm} className="flex-1 h-10 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-md shadow-blue-600/20">
-                    Ya, Pasang Bounty
-                    <ChevronRight className="w-3.5 h-3.5 ml-1" />
+                <Button disabled={loading} onClick={onConfirm} className="flex-1 h-10 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-md shadow-blue-600/20">
+                    {loading ? (
+                        <span className="flex items-center gap-1.5 justify-center">
+                            <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            Memposting...
+                        </span>
+                    ) : (
+                        <span className="flex items-center justify-center gap-1">
+                            Posting <ChevronRight className="w-3.5 h-3.5" />
+                        </span>
+                    )}
                 </Button>
             </div>
         </div>
@@ -68,9 +78,9 @@ export default function StepConfirm({
 
 function Row({ label, value }: { label: string; value: string }) {
     return (
-        <div className="px-4 py-3 flex items-start justify-between gap-3">
+        <div className="px-4 py-3 flex justify-between gap-6">
             <span className="text-muted-foreground shrink-0">{label}</span>
-            <span className="font-semibold text-foreground text-right max-w-[55%] leading-snug">{value}</span>
+            <span className="font-semibold text-foreground text-right truncate">{value}</span>
         </div>
     );
 }

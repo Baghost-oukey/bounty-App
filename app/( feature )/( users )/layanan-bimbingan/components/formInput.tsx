@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
-import { Sparkles, MapPin, ChevronRight, CheckCircle2, Loader2, ArrowLeft } from "lucide-react";
+import { MapPin, ChevronRight, CheckCircle2, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { createBountyTask, getActiveBountyTasks } from "@/app/actions/bounty";
+import { getProfileStatus } from "@/app/actions/profile";
 
 const MapView = dynamic(() => import("./MapView"), { ssr: false });
 
@@ -23,38 +25,6 @@ const LEVELS = ["SD", "SMP", "SMA", "Mahasiswa", "Umum / Profesional"];
 const SESSION_OPTIONS = ["1x pertemuan", "2x per minggu", "3x per minggu", "Setiap hari"];
 const MODE_OPTIONS = ["Tatap muka", "Online (video call)", "Keduanya bisa"];
 
-function processWithAI(
-    raw: string,
-    subject: string,
-    level: string,
-    price: number
-): Promise<{ cleaned: string; suggestedPrice: number; tooLow: boolean }> {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            const subjectLabel = SUBJECTS.find((s) => s.id === subject)?.label ?? subject;
-            const parts: string[] = [];
-            if (subjectLabel) parts.push(`Bimbingan ${subjectLabel}`);
-            if (level) parts.push(`untuk tingkat ${level}`);
-
-            const keywords = [
-                { pattern: /ujian|ulangan|uts|uas|try.?out/i, extra: "persiapan ujian" },
-                { pattern: /pr|tugas|homework/i, extra: "bantu mengerjakan tugas" },
-                { pattern: /les|privat|intensif/i, extra: "les privat intensif" },
-                { pattern: /dasar|pemula|belum bisa/i, extra: "dari dasar" },
-                { pattern: /nilai|remedial|perbaikan/i, extra: "perbaikan nilai" },
-            ];
-            keywords.forEach((k) => {
-                if (k.pattern.test(raw)) parts.push(k.extra);
-            });
-
-            const cleaned = parts.length > 0 ? parts.join(", ") : raw.trim();
-            const minPrice = level === "Mahasiswa" || level === "Umum / Profesional" ? 100000 : 75000;
-            const tooLow = price < minPrice;
-            resolve({ cleaned, suggestedPrice: tooLow ? minPrice : price, tooLow });
-        }, 1200);
-    });
-}
-
 type Step = "input" | "confirmed";
 
 const DEFAULT_LAT = -6.2297;
@@ -72,33 +42,105 @@ export default function FormInput() {
     const [session, setSession] = useState("");
     const [mode, setMode] = useState("");
     const [step, setStep] = useState<Step>("input");
-    const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState<{ cleaned: string; suggestedPrice: number; tooLow: boolean } | null>(null);
-    const [finalPrice, setFinalPrice] = useState(0);
+    const [posting, setPosting] = useState(false);
     const [mapReady, setMapReady] = useState(false);
 
-    useEffect(() => { setMapReady(true); }, []);
+    // Dynamic state populated from local storage & database
+    const [address, setAddress]   = useState(DEFAULT_ADDRESS);
+    const [lat, setLat]           = useState(Number(DEFAULT_LAT));
+    const [lng, setLng]           = useState(Number(DEFAULT_LNG));
+    const [userName, setUserName] = useState("Pengguna");
+    const [activeBounties, setActiveBounties] = useState<any[]>([]);
 
-    const handleProcess = async () => {
-        if (!rawText.trim() || !price) return;
-        setLoading(true);
-        const res = await processWithAI(rawText, subject, level, Number(price.replace(/\D/g, "")));
-        setResult(res);
-        setFinalPrice(res.suggestedPrice);
-        setLoading(false);
+    const fetchActiveBounties = () => {
+        getActiveBountyTasks().then((res) => {
+            if (res.success && res.tasks) {
+                // Do NOT filter - show all active bounties to make map look busy and active!
+                setActiveBounties(res.tasks);
+            }
+        }).catch((err) => {
+            console.error("Error fetching active bounties:", err);
+        });
     };
 
-    const handleConfirm = () => setStep("confirmed");
+    useEffect(() => {
+        setMapReady(true);
+        fetchActiveBounties();
+
+        const storedAddr = localStorage.getItem("bounty_pickup_address");
+        const storedLat = localStorage.getItem("bounty_pickup_lat");
+        const storedLng = localStorage.getItem("bounty_pickup_lng");
+        if (storedAddr) setAddress(storedAddr);
+        if (storedLat) setLat(Number(storedLat));
+        if (storedLng) setLng(Number(storedLng));
+
+        getProfileStatus().then((status) => {
+            if (status.authenticated && status.dbUser) {
+                const name = status.dbUser.profil?.namaLengkap || status.dbUser.username || "Pengguna";
+                setUserName(name);
+            }
+        }).catch((err) => {
+            console.error("Error profile status:", err);
+        });
+    }, []);
+
+    const canPost = subject !== "" && level !== "" && session !== "" && mode !== "" && rawText.trim() !== "" && price !== "";
+    const finalPrice = Number(price.replace(/\D/g, "")) || 0;
+
+    const handleConfirmPost = async () => {
+        if (!canPost || posting) return;
+        setPosting(true);
+        try {
+            const subjectLabel = SUBJECTS.find((s) => s.id === subject)?.label || "Bimbingan Belajar";
+            const res = await createBountyTask({
+                serviceName: "Layanan Bimbingan Belajar",
+                categories: [`${subjectLabel} (${level})`],
+                date: new Date().toISOString().split("T")[0],
+                time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+                description: rawText + (session ? ` | Frekuensi Sesi: ${session}` : "") + (mode ? ` | Metode: ${mode}` : ""),
+                price: finalPrice,
+                address,
+                lat,
+                lng,
+            });
+
+            if (res.success) {
+                fetchActiveBounties();
+                setStep("confirmed");
+            } else {
+                alert(res.error || "Gagal memposting bounty. Silakan coba lagi.");
+            }
+        } catch (err) {
+            console.error("Error posting bounty:", err);
+            alert("Terjadi kesalahan server.");
+        } finally {
+            setPosting(false);
+        }
+    };
 
     const handlePriceInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         const digits = e.target.value.replace(/\D/g, "");
         setPrice(digits ? Number(digits).toLocaleString("id-ID") : "");
     };
 
+    const userInitials = userName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+
     return (
         <div className="relative w-full h-full bg-gray-100">
             <div className="absolute inset-0 z-0">
-                {mapReady && <MapView lat={DEFAULT_LAT} lng={DEFAULT_LNG} address={DEFAULT_ADDRESS} />}
+                {mapReady && (
+                    <MapView 
+                        lat={lat} 
+                        lng={lng} 
+                        address={address} 
+                        activeBounties={activeBounties} 
+                    />
+                )}
             </div>
 
             {/* Mini nav */}
@@ -108,9 +150,11 @@ export default function FormInput() {
                     <span className="text-[11px] font-semibold text-foreground">Tutor tersedia</span>
                 </div>
                 <div className="bg-background/90 backdrop-blur-sm border border-border/50 rounded-full px-3 py-1.5 shadow-lg flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">AF</div>
+                    <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">
+                        {userInitials || "U"}
+                    </div>
                     <div className="hidden sm:block">
-                        <p className="text-[11px] font-semibold text-foreground leading-none">Ahmad Fauzi</p>
+                        <p className="text-[11px] font-semibold text-foreground leading-none">{userName}</p>
                         <p className="text-[9px] text-blue-600 font-medium mt-0.5">Premium Member</p>
                     </div>
                 </div>
@@ -121,7 +165,7 @@ export default function FormInput() {
 
                 {/* Header */}
                 <div className="flex items-center gap-3 px-5 pt-5 pb-4 border-b border-border/40 shrink-0">
-                    <Link href="/dashboard" className="p-1.5 hover:bg-muted rounded-xl transition-colors shrink-0">
+                    <Link href="/order-pages" className="p-1.5 hover:bg-muted rounded-xl transition-colors shrink-0">
                         <ArrowLeft className="w-4 h-4 text-muted-foreground" />
                     </Link>
                     <div className="flex-1 min-w-0">
@@ -135,180 +179,125 @@ export default function FormInput() {
                 </div>
 
                 {/* Body */}
-                <div className="flex-1 overflow-y-auto flex flex-col">
+                <div className="flex-1 overflow-y-auto flex flex-col justify-between">
                     {step === "input" && (
-                        <div className="flex flex-col flex-1">
-                            <div className="px-5 py-4 space-y-4 border-b border-border/40">
-
-                                {/* Location */}
+                        <div className="flex flex-col flex-1 px-5 py-5 space-y-4 justify-between">
+                            <div className="space-y-4">
+                                {/* Location address */}
                                 <div className="flex items-center gap-2.5 bg-blue-50 border border-blue-100 rounded-2xl px-4 py-3">
                                     <MapPin className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                                    <span className="text-xs text-blue-700 flex-1 truncate">{DEFAULT_ADDRESS}</span>
-                                    <button className="text-[10px] font-bold text-blue-500 hover:text-blue-600 shrink-0">Ubah</button>
+                                    <span className="text-xs text-blue-700 flex-1 truncate">{address}</span>
+                                    <Link href="/order-pages" className="text-[10px] font-bold text-blue-500 hover:text-blue-600 shrink-0">Ubah</Link>
                                 </div>
 
-                                {/* Subject picker */}
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-foreground">Mata pelajaran</label>
+                                {/* Subject selection */}
+                                <div className="space-y-1.5">
+                                    <label className="text-sm font-semibold text-foreground">Mata Pelajaran</label>
                                     <div className="grid grid-cols-2 gap-2">
                                         {SUBJECTS.map((s) => (
                                             <button
                                                 key={s.id}
+                                                type="button"
                                                 onClick={() => setSubject(s.id)}
-                                                className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl border text-xs font-semibold transition-all text-left ${
-                                                    subject === s.id
-                                                        ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20"
-                                                        : "bg-muted/50 border-border/50 text-foreground hover:border-blue-300 hover:bg-blue-50"
-                                                }`}
+                                                className={`flex items-center gap-2 p-2.5 border rounded-2xl text-xs font-semibold transition-all ${subject === s.id ? "border-blue-600 bg-blue-50 text-blue-700" : "border-border/50 text-muted-foreground hover:bg-muted/50"}`}
                                             >
-                                                <span className="text-base leading-none">{s.icon}</span>
-                                                <span className="leading-snug">{s.label}</span>
+                                                <span>{s.icon}</span>
+                                                <span className="truncate">{s.label}</span>
                                             </button>
                                         ))}
                                     </div>
                                 </div>
 
-                                {/* Level + Mode */}
+                                {/* Academic Level & Session Frequency */}
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="space-y-1.5">
-                                        <label className="text-sm font-semibold text-foreground">Tingkat</label>
+                                        <label className="text-sm font-semibold text-foreground">Tingkatan Sekolah</label>
                                         <select
                                             value={level}
                                             onChange={(e) => setLevel(e.target.value)}
-                                            className="w-full bg-muted/50 border border-border/50 rounded-2xl px-3 py-2.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                            className="w-full bg-muted/50 border border-border/50 rounded-2xl px-3 py-3 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                                         >
-                                            <option value="">Pilih tingkat</option>
-                                            {LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
+                                            <option value="">Pilih tingkat...</option>
+                                            {LEVELS.map((l) => (
+                                                <option key={l} value={l}>{l}</option>
+                                            ))}
                                         </select>
                                     </div>
                                     <div className="space-y-1.5">
-                                        <label className="text-sm font-semibold text-foreground">Mode belajar</label>
+                                        <label className="text-sm font-semibold text-foreground">Frekuensi Sesi</label>
                                         <select
-                                            value={mode}
-                                            onChange={(e) => setMode(e.target.value)}
-                                            className="w-full bg-muted/50 border border-border/50 rounded-2xl px-3 py-2.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                            value={session}
+                                            onChange={(e) => setSession(e.target.value)}
+                                            className="w-full bg-muted/50 border border-border/50 rounded-2xl px-3 py-3 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                                         >
-                                            <option value="">Pilih mode</option>
-                                            {MODE_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
+                                            <option value="">Pilih jadwal...</option>
+                                            {SESSION_OPTIONS.map((so) => (
+                                                <option key={so} value={so}>{so}</option>
+                                            ))}
                                         </select>
                                     </div>
                                 </div>
 
-                                {/* Session frequency */}
+                                {/* Mode */}
                                 <div className="space-y-1.5">
-                                    <label className="text-sm font-semibold text-foreground">Frekuensi sesi</label>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {SESSION_OPTIONS.map((s) => (
-                                            <button
-                                                key={s}
-                                                onClick={() => setSession(s)}
-                                                className={`py-2 px-3 rounded-2xl border text-xs font-semibold transition-all text-left ${
-                                                    session === s
-                                                        ? "bg-blue-600 text-white border-blue-600"
-                                                        : "bg-muted/50 border-border/50 text-foreground hover:border-blue-300 hover:bg-blue-50"
-                                                }`}
-                                            >
-                                                {s}
-                                            </button>
+                                    <label className="text-sm font-semibold text-foreground">Metode Pembelajaran</label>
+                                    <select
+                                        value={mode}
+                                        onChange={(e) => setMode(e.target.value)}
+                                        className="w-full bg-muted/50 border border-border/50 rounded-2xl px-3 py-3 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                    >
+                                        <option value="">Pilih metode...</option>
+                                        {MODE_OPTIONS.map((mo) => (
+                                            <option key={mo} value={mo}>{mo}</option>
                                         ))}
-                                    </div>
+                                    </select>
                                 </div>
 
-                                {/* Notes */}
+                                {/* Details description */}
                                 <div className="space-y-1.5">
-                                    <label className="text-sm font-semibold text-foreground">Keterangan tambahan</label>
+                                    <label className="text-sm font-semibold text-foreground">Detail Bimbingan</label>
                                     <textarea
                                         value={rawText}
                                         onChange={(e) => setRawText(e.target.value)}
-                                        placeholder="Misal: perlu persiapan ujian nasional, nilai matematika jelek, mau belajar dari dasar..."
+                                        placeholder="Kebutuhan khusus siswa... misal: persiapan UTS, butuh diajarkan rumus kalkulus dasar"
                                         rows={3}
                                         className="w-full bg-muted/50 border border-border/50 rounded-2xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none leading-relaxed"
                                     />
                                 </div>
 
-                                {/* Budget + AI */}
+                                {/* Budget per session */}
                                 <div className="space-y-1.5">
-                                    <label className="text-sm font-semibold text-foreground">Budget per sesi</label>
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex-1 flex items-center gap-2 bg-muted/50 border border-border/50 rounded-2xl px-4 py-3 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all">
-                                            <span className="text-xs font-bold text-muted-foreground shrink-0">Rp</span>
-                                            <input
-                                                type="text"
-                                                inputMode="numeric"
-                                                value={price}
-                                                onChange={handlePriceInput}
-                                                placeholder="75.000"
-                                                className="flex-1 bg-transparent border-0 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
-                                            />
-                                        </div>
-                                        <button
-                                            onClick={handleProcess}
-                                            disabled={!rawText.trim() || !price || loading}
-                                            title="Proses dengan AI"
-                                            className="w-11 h-11 rounded-2xl bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center shrink-0 transition-colors shadow-md shadow-blue-600/20"
-                                        >
-                                            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                                        </button>
+                                    <label className="text-sm font-semibold text-foreground">Budget per sesi (Rp)</label>
+                                    <div className="flex items-center gap-2 bg-muted/50 border border-border/50 rounded-2xl px-4 py-3 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all">
+                                        <span className="text-xs font-bold text-muted-foreground shrink-0">Rp</span>
+                                        <input
+                                            type="text"
+                                            inputMode="numeric"
+                                            value={price}
+                                            onChange={handlePriceInput}
+                                            placeholder="75.000"
+                                            className="flex-1 bg-transparent border-0 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
+                                        />
                                     </div>
                                 </div>
                             </div>
 
-                            {/* AI Feedback */}
-                            <div className="flex-1 flex flex-col px-5 py-4 space-y-3">
-                                <div className="flex items-center gap-2">
-                                    <Sparkles className="w-3.5 h-3.5 text-blue-500" />
-                                    <span className="text-xs font-bold text-foreground">Ringkasan AI</span>
-                                    <span className="text-[10px] text-muted-foreground ml-auto">Otomatis diperbarui</span>
-                                </div>
-
-                                <div className="flex-1 min-h-[100px] bg-muted/30 border border-border/40 rounded-2xl p-4">
-                                    {loading ? (
-                                        <div className="h-full flex flex-col items-center justify-center gap-2">
-                                            <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
-                                            <p className="text-xs text-muted-foreground">AI sedang menganalisis...</p>
-                                        </div>
-                                    ) : result ? (
-                                        <div className="space-y-3 text-xs">
-                                            <div>
-                                                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-1">Kebutuhan belajar</p>
-                                                <p className="text-foreground font-medium leading-relaxed">{result.cleaned}</p>
-                                            </div>
-                                            <div className="border-t border-border/30 pt-3">
-                                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Tarif wajar per sesi</p>
-                                                <p className={`font-bold text-sm ${result.tooLow ? "text-amber-500" : "text-green-600"}`}>
-                                                    {formatRupiah(result.suggestedPrice)}
-                                                    {result.tooLow && <span className="text-[10px] font-normal text-amber-500/80 ml-1.5">(budget terlalu rendah)</span>}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="h-full flex flex-col items-center justify-center gap-2 text-center">
-                                            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                                                <Sparkles className="w-4 h-4 text-muted-foreground/50" />
-                                            </div>
-                                            <p className="text-xs text-muted-foreground/60 max-w-[200px] leading-relaxed">
-                                                Isi form lalu tekan <span className="font-semibold">ikon bintang</span> untuk analisis AI
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {result?.tooLow && (
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <button onClick={() => setFinalPrice(Number(price.replace(/\D/g, "")))} className={`py-2.5 rounded-xl border text-xs font-bold transition-all ${finalPrice === Number(price.replace(/\D/g, "")) ? "bg-foreground text-background border-foreground" : "border-border/60 text-muted-foreground hover:border-foreground hover:text-foreground"}`}>
-                                            Tetap {formatRupiah(Number(price.replace(/\D/g, "")))}
-                                        </button>
-                                        <button onClick={() => setFinalPrice(result.suggestedPrice)} className={`py-2.5 rounded-xl border text-xs font-bold transition-all ${finalPrice === result.suggestedPrice ? "bg-blue-600 text-white border-blue-600" : "border-blue-200 text-blue-600 hover:bg-blue-50"}`}>
-                                            Pakai {formatRupiah(result.suggestedPrice)}
-                                        </button>
-                                    </div>
+                            <Button
+                                onClick={handleConfirmPost}
+                                disabled={!canPost || posting}
+                                className="w-full h-12 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-lg shadow-blue-600/25 disabled:opacity-40 disabled:cursor-not-allowed mt-6"
+                            >
+                                {posting ? (
+                                    <span className="flex items-center gap-1.5 justify-center">
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Memproses Posting...
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center justify-center gap-1">
+                                        Posting Permintaan <ChevronRight className="w-4 h-4" />
+                                    </span>
                                 )}
-
-                                <Button onClick={handleConfirm} disabled={!result} className="w-full h-11 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-lg shadow-blue-600/25 disabled:opacity-40 disabled:cursor-not-allowed mt-auto">
-                                    <ChevronRight className="w-4 h-4 mr-1" />
-                                    Posting Permintaan
-                                </Button>
-                            </div>
+                            </Button>
                         </div>
                     )}
 
@@ -320,24 +309,18 @@ export default function FormInput() {
                             <div>
                                 <h2 className="text-lg font-bold text-foreground">Bounty Dipasang!</h2>
                                 <p className="text-xs text-muted-foreground mt-1 max-w-[240px] mx-auto leading-relaxed">
-                                    Tutor terdekat akan segera menghubungimu.
+                                    Tutor terdekat akan segera mengambil orderanmu.
                                 </p>
                             </div>
                             <div className="bg-muted/40 border border-border/40 rounded-2xl px-4 py-4 w-full space-y-2.5 text-left text-xs">
                                 <div className="flex justify-between gap-2">
-                                    <span className="text-muted-foreground">Kebutuhan</span>
-                                    <span className="font-semibold text-foreground text-right leading-snug max-w-[55%]">{result?.cleaned}</span>
+                                    <span className="text-muted-foreground">Bimbingan</span>
+                                    <span className="font-semibold text-foreground text-right leading-snug max-w-[55%] truncate">{rawText}</span>
                                 </div>
-                                {mode && (
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Mode</span>
-                                        <span className="font-semibold text-foreground">{mode}</span>
-                                    </div>
-                                )}
                                 {session && (
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Frekuensi</span>
-                                        <span className="font-semibold text-foreground">{session}</span>
+                                        <span className="text-muted-foreground">Jadwal</span>
+                                        <span className="font-semibold text-foreground text-right">{session}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between border-t border-border/30 pt-2.5">
@@ -345,7 +328,7 @@ export default function FormInput() {
                                     <span className="font-bold text-blue-600">{formatRupiah(finalPrice)}</span>
                                 </div>
                             </div>
-                            <Link href="/dashboard" className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+                            <Link href="/dashboard-pages" className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors">
                                 Kembali ke Dashboard
                             </Link>
                         </div>
@@ -356,7 +339,7 @@ export default function FormInput() {
                     <span className="text-[10px] text-muted-foreground/60 font-medium">© Bounty · OpenStreetMap</span>
                     <div className="flex items-center gap-1.5">
                         <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                        <span className="text-[10px] text-muted-foreground/60">Tutor online</span>
+                        <span className="text-[10px] text-muted-foreground/60">1 lokasi aktif</span>
                     </div>
                 </div>
             </div>
