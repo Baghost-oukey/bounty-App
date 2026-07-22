@@ -100,7 +100,7 @@ export default function Timeline() {
           </div>
 
           {/* Vertical Track Line: Only visible on Mobile & Tablet (below lg) */}
-          <div className="absolute left-[23px] top-6 bottom-6 w-0.5 bg-zinc-150 lg:hidden rounded-full" />
+          <div className="absolute left-[23px] top-6 bottom-6 w-0.5 bg-zinc-200 lg:hidden rounded-full" />
 
           {/* Cards layout - Stacks vertically below lg, row grid on lg */}
           <div className="flex flex-col lg:grid lg:grid-cols-4 gap-10 md:gap-12 relative z-20">

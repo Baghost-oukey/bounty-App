@@ -19,7 +19,9 @@ const pinIcon = typeof window !== "undefined" ? L.divIcon({
         <div style="position:absolute;top:5px;left:50%;transform:translateX(-50%);
             width:20px;height:20px;background:white;border-radius:50%;
             display:flex;align-items:center;justify-content:center;
-            font-size:11px;line-height:1;">📍</div>
+            box-shadow:0 1.5px 4px rgba(0,0,0,0.12);">
+            <div style="width:8px;height:8px;background:#2563eb;border-radius:50%;"></div>
+        </div>
     </div>
   `,
   iconSize: [36, 44],

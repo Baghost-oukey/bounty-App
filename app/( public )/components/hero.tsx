@@ -44,12 +44,12 @@ export function HeroSection() {
         </p>
 
         <div className="fade-in slide-in-from-bottom-10 flex animate-in flex-row flex-wrap items-center justify-center gap-3 fill-mode-backwards pt-2 delay-300 duration-500 ease-out">
-          <Button render={<Link href="/login-pages" />} className="rounded-full cursor-pointer" size="lg" variant="secondary">
+          <Button render={<Link href="/login-pages" />} className="rounded-full cursor-pointer animate-none" size="lg" variant="secondary">
             <span className="flex items-center gap-1.5 cursor-pointer">
               <PhoneCallIcon data-icon="inline-start" /> Hubungi Kami
             </span>
           </Button>
-          <Button render={<Link href="/login-pages" />} className="rounded-full cursor-pointer" size="lg">
+          <Button render={<Link href="/login-pages" />} className="rounded-full cursor-pointer animate-none" size="lg">
             <span className="flex items-center gap-1.5 cursor-pointer">
               Coba Sekarang <ArrowRightIcon data-icon="inline-end" />
             </span>

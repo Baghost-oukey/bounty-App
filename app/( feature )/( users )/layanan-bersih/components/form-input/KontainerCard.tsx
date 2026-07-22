@@ -20,12 +20,13 @@ export default function CardContent({
     price, handlePriceInput,
     selectedLabels, finalPrice,
     canPost, handlePost,
+    address, loading, onConfirmPost,
 }: CardContentProps) {
     return (
         <>
             {/* Header */}
             <div className="flex items-center gap-3 px-5 pt-4 pb-4 border-b border-border/40 shrink-0">
-                <Link href="/dashboard" className="p-1.5 hover:bg-muted rounded-xl transition-colors shrink-0">
+                <Link href="/order-pages" className="p-1.5 hover:bg-muted rounded-xl transition-colors shrink-0">
                     <ArrowLeft className="w-4 h-4 text-muted-foreground" />
                 </Link>
                 <div className="flex-1 min-w-0">
@@ -45,8 +46,10 @@ export default function CardContent({
                         {/* Lokasi */}
                         <div className="flex items-center gap-2.5 bg-blue-50 border border-blue-100 rounded-2xl px-4 py-3">
                             <MapPin className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                            <span className="text-xs text-blue-700 flex-1 truncate">{DEFAULT_ADDRESS}</span>
-                            <button className="text-[10px] font-bold text-blue-500 hover:text-blue-600 shrink-0">Ubah</button>
+                            <span className="text-xs text-blue-700 flex-1 truncate">{address || DEFAULT_ADDRESS}</span>
+                            <Link href="/order-pages" className="text-[10px] font-bold text-blue-500 hover:text-blue-600 shrink-0 cursor-pointer">
+                                Ubah
+                            </Link>
                         </div>
 
                         <KategoriInput
@@ -107,7 +110,8 @@ export default function CardContent({
                     <ModalKonfirmasi
                         selectedLabels={selectedLabels} date={date} time={time}
                         description={description} finalPrice={finalPrice}
-                        onBack={() => setStep("input")} onConfirm={() => setStep("done")}
+                        onBack={() => setStep("input")} onConfirm={onConfirmPost || (() => setStep("done"))}
+                        address={address} loading={loading}
                     />
                 )}
 

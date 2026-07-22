@@ -105,7 +105,7 @@ export default function BottomSheet(props: Props) {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <Link
-                                href="/dashboard"
+                                href="/order-pages"
                                 className="p-1.5 hover:bg-muted rounded-xl transition-colors shrink-0"
                                 onClick={(e) => e.stopPropagation()}
                             >

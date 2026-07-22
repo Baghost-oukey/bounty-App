@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
@@ -6,6 +6,8 @@ import { type Step } from "./form-input/types";
 import { CATEGORIES, DEFAULT_LAT, DEFAULT_LNG, DEFAULT_ADDRESS } from "./form-input/constants";
 import CardContent from "./form-input/KontainerCard";
 import BottomSheet from "./form-input/DropdownButtom";
+import { createBountyTask, getActiveBountyTasks } from "@/app/actions/bounty";
+import { getProfileStatus } from "@/app/actions/profile";
 
 const MapView = dynamic(() => import("./MapView"), { ssr: false });
 
@@ -19,8 +21,48 @@ export default function FormInput() {
     const [finalPrice, setFinalPrice] = useState(0);
     const [step, setStep]         = useState<Step>("input");
     const [mapReady, setMapReady] = useState(false);
+    const [loading, setLoading]   = useState(false);
 
-    useEffect(() => { setMapReady(true); }, []);
+    // Dynamic state populated from local storage & database
+    const [address, setAddress]   = useState(DEFAULT_ADDRESS);
+    const [lat, setLat]           = useState(Number(DEFAULT_LAT));
+    const [lng, setLng]           = useState(Number(DEFAULT_LNG));
+    const [userName, setUserName] = useState("Pengguna");
+    const [activeBounties, setActiveBounties] = useState<any[]>([]);
+
+    const fetchActiveBounties = () => {
+        getActiveBountyTasks().then((res) => {
+            if (res.success && res.tasks) {
+                // Do NOT filter - show all active bounties to make map look busy and active!
+                setActiveBounties(res.tasks);
+            }
+        }).catch((err) => {
+            console.error("Error fetching active bounties:", err);
+        });
+    };
+
+    useEffect(() => {
+        setMapReady(true);
+        fetchActiveBounties();
+
+        // Load dynamic location from order-pages selections
+        const storedAddr = localStorage.getItem("bounty_pickup_address");
+        const storedLat = localStorage.getItem("bounty_pickup_lat");
+        const storedLng = localStorage.getItem("bounty_pickup_lng");
+        if (storedAddr) setAddress(storedAddr);
+        if (storedLat) setLat(Number(storedLat));
+        if (storedLng) setLng(Number(storedLng));
+
+        // Fetch actual profile name
+        getProfileStatus().then((status) => {
+            if (status.authenticated && status.dbUser) {
+                const name = status.dbUser.profil?.namaLengkap || status.dbUser.username || "Pengguna";
+                setUserName(name);
+            }
+        }).catch((err) => {
+            console.error("Error fetching profile name:", err);
+        });
+    }, []);
 
     const canPost = selectedCategories.length > 0 && !!date && !!time;
 
@@ -45,6 +87,45 @@ export default function FormInput() {
         setPrice(digits ? Number(digits).toLocaleString("id-ID") : "");
     };
 
+    // Submits the bounty task to Postgres via Prisma server action
+    const handleConfirmPost = async () => {
+        if (loading) return;
+        setLoading(true);
+        try {
+            const res = await createBountyTask({
+                serviceName: "Layanan Bersih - Bersih",
+                categories: selectedLabels,
+                date,
+                time,
+                description,
+                price: finalPrice,
+                address,
+                lat,
+                lng,
+            });
+
+            if (res.success) {
+                fetchActiveBounties(); // Reload list to map
+                setStep("done");
+            } else {
+                alert(res.error || "Gagal memposting bounty. Silakan coba lagi.");
+            }
+        } catch (err) {
+            console.error("Error posting bounty:", err);
+            alert("Terjadi kesalahan koneksi server.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Generate initials for avatar bubble
+    const userInitials = userName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+
     const cardProps = {
         step, setStep,
         selectedCategories, setSelectedCategories,
@@ -55,6 +136,7 @@ export default function FormInput() {
         price, handlePriceInput,
         selectedLabels, finalPrice,
         canPost, handlePost,
+        address, loading, onConfirmPost: handleConfirmPost,
     };
 
     return (
@@ -71,11 +153,10 @@ export default function FormInput() {
             >
                 {mapReady && (
                     <MapView
-                        lat={DEFAULT_LAT}
-                        lng={DEFAULT_LNG}
-                        address={DEFAULT_ADDRESS}
-                        bountyActive={step === "done"}
-                        bountyLabel={selectedLabels.slice(0, 2).join(", ")}
+                        lat={lat}
+                        lng={lng}
+                        address={address}
+                        activeBounties={activeBounties}
                     />
                 )}
             </div>
@@ -87,9 +168,11 @@ export default function FormInput() {
                     <span className="text-[11px] font-semibold text-foreground">Tenaga tersedia</span>
                 </div>
                 <div className="bg-background/90 backdrop-blur-sm border border-border/50 rounded-full px-3 py-1.5 shadow-lg flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">AF</div>
+                    <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">
+                        {userInitials || "U"}
+                    </div>
                     <div>
-                        <p className="text-[11px] font-semibold text-foreground leading-none">Ahmad Fauzi</p>
+                        <p className="text-[11px] font-semibold text-foreground leading-none">{userName}</p>
                         <p className="text-[9px] text-blue-600 font-medium mt-0.5">Premium Member</p>
                     </div>
                 </div>
