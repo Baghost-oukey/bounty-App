@@ -7,15 +7,15 @@ import "leaflet/dist/leaflet.css";
 import { Search, MapPin, X, Loader2, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Custom pin icon matching the Bounty App theme (teal gradient)
+// Custom pin icon matching the Bounty App theme (blue gradient)
 const pinIcon = typeof window !== "undefined" ? L.divIcon({
   className: "",
   html: `
     <div style="position:relative;width:36px;height:44px;">
         <div style="position:absolute;top:0;left:50%;transform:translateX(-50%) rotate(-45deg);
-            width:32px;height:32px;background:linear-gradient(135deg,#0d9488,#0f766e);
+            width:32px;height:32px;background:linear-gradient(135deg,#2563eb,#1d4ed8);
             border-radius:50% 50% 50% 0;border:3px solid white;
-            box-shadow:0 4px 14px rgba(13,148,136,0.45);"></div>
+            box-shadow:0 4px 14px rgba(37,99,235,0.45);"></div>
         <div style="position:absolute;top:5px;left:50%;transform:translateX(-50%);
             width:20px;height:20px;background:white;border-radius:50%;
             display:flex;align-items:center;justify-content:center;
@@ -77,24 +77,43 @@ export default function MapPickerModal({ isOpen, onClose, onConfirm, initialLat,
 
   // Function to fetch GPS coordinates and update map center
   const locateUserGPS = () => {
-    if (!navigator.geolocation) {
-      alert("Geolokasi tidak didukung oleh browser Anda.");
-      return;
+    try {
+      if (typeof window === "undefined" || !navigator.geolocation) {
+        console.warn("Geolocation is not supported by this browser.");
+        return;
+      }
+      setLocatingGps(true);
+      
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          setPosition([lat, lon]);
+          setLocatingGps(false);
+        },
+        (err) => {
+          console.warn("GPS high accuracy failed, trying fallback...", err.message);
+          // Try fallback without high accuracy (much more reliable on desktops/WIFI)
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              const lat = pos.coords.latitude;
+              const lon = pos.coords.longitude;
+              setPosition([lat, lon]);
+              setLocatingGps(false);
+            },
+            (err2) => {
+              console.warn("GPS fallback also failed:", err2.message);
+              setLocatingGps(false);
+            },
+            { enableHighAccuracy: false, timeout: 5000 }
+          );
+        },
+        { enableHighAccuracy: true, timeout: 4000 }
+      );
+    } catch (e) {
+      console.warn("GPS locate exception caught:", e);
+      setLocatingGps(false);
     }
-    setLocatingGps(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
-        setPosition([lat, lon]);
-        setLocatingGps(false);
-      },
-      (err) => {
-        console.error("GPS retrieval error:", err);
-        setLocatingGps(false);
-      },
-      { enableHighAccuracy: true, timeout: 7000 }
-    );
   };
 
   // Sync position with initial values and request auto-GPS on open
@@ -104,8 +123,6 @@ export default function MapPickerModal({ isOpen, onClose, onConfirm, initialLat,
       setSelectedAddress(null);
       setSearchQuery("");
       setSearchResults([]);
-      
-      // Auto-grab GPS coordinates immediately on open to center the map on the user's location
       locateUserGPS();
     }
   }, [isOpen, initialLat, initialLng]);
@@ -158,7 +175,18 @@ export default function MapPickerModal({ isOpen, onClose, onConfirm, initialLat,
         });
       }
     } catch (err) {
-      console.error("Reverse geocoding error:", err);
+      console.warn("Reverse geocoding error:", err);
+      // Fallback address so the user can still confirm coordinates even if Nominatim API is down/rate-limited
+      setSelectedAddress({
+        alamatLengkap: `Lokasi Terpilih (${lat.toFixed(6)}, ${lng.toFixed(6)})`,
+        provinsi: "-",
+        kabupaten: "-",
+        kecamatan: "-",
+        kelurahan: "-",
+        kodePos: "",
+        latitude: lat,
+        longitude: lng
+      });
     } finally {
       setReverseGeocoding(false);
     }
@@ -217,22 +245,22 @@ export default function MapPickerModal({ isOpen, onClose, onConfirm, initialLat,
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
-      <div className="bg-white rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-white rounded-[32px] w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col border border-slate-100/80 animate-in fade-in zoom-in-95 duration-300">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center text-teal-600">
-              <MapPin size={18} />
+        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm shrink-0">
+              <MapPin size={20} />
             </div>
             <div>
-              <h3 className="font-bold text-slate-800 text-sm">Pilih Lokasi Alamat</h3>
-              <p className="text-[10px] text-slate-400 font-medium">Geser pin atau klik pada peta untuk menetapkan alamat tinggal Anda.</p>
+              <h3 className="text-xl font-bold text-slate-800 tracking-tight">Pilih Lokasi Alamat</h3>
+              <p className="text-xs text-slate-400 font-light mt-1">Geser pin atau klik pada peta untuk menetapkan alamat tinggal Anda.</p>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors p-1.5 rounded-full hover:bg-slate-100"
+            className="text-slate-400 hover:text-slate-600 transition-all p-2 rounded-full hover:bg-slate-50 cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -250,13 +278,13 @@ export default function MapPickerModal({ isOpen, onClose, onConfirm, initialLat,
                 placeholder="Cari jalan, kelurahan, atau kecamatan Anda..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-slate-200 rounded-2xl pl-10 pr-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 font-medium shadow-sm transition-all"
+                className="w-full bg-white border border-slate-200 rounded-2xl pl-10 pr-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-semibold shadow-sm transition-all placeholder-slate-400"
               />
             </div>
             <Button
               type="submit"
               disabled={searching}
-              className="h-[38px] px-4 rounded-2xl text-xs font-bold bg-teal-500 hover:bg-teal-600 text-white flex items-center gap-1.5 shrink-0"
+              className="h-[38px] px-5 rounded-2xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 shrink-0 shadow-md shadow-blue-600/10 cursor-pointer transition-all"
             >
               {searching ? <Loader2 size={14} className="animate-spin" /> : "Cari"}
             </Button>
@@ -268,12 +296,12 @@ export default function MapPickerModal({ isOpen, onClose, onConfirm, initialLat,
             onClick={locateUserGPS}
             disabled={locatingGps}
             variant="outline"
-            className="h-[38px] px-4 rounded-2xl text-xs font-bold border-teal-200 text-teal-600 hover:bg-teal-50 shrink-0 flex items-center gap-1.5"
+            className="h-[38px] px-5 rounded-2xl text-xs font-bold border-blue-200 text-blue-600 hover:bg-blue-50 shrink-0 flex items-center gap-1.5 shadow-sm cursor-pointer transition-all"
           >
             {locatingGps ? (
-              <Loader2 size={14} className="animate-spin text-teal-500" />
+              <Loader2 size={14} className="animate-spin text-blue-500" />
             ) : (
-              <Navigation size={14} />
+              <Navigation size={14} className="transform rotate-45" />
             )}
             GPS Aktif
           </Button>
@@ -286,7 +314,7 @@ export default function MapPickerModal({ isOpen, onClose, onConfirm, initialLat,
                   key={idx}
                   type="button"
                   onClick={() => handleSelectResult(result)}
-                  className="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-slate-700 transition-colors font-medium flex items-start gap-2"
+                  className="w-full text-left px-4 py-3 hover:bg-slate-50 text-slate-700 transition-colors font-medium flex items-start gap-2 cursor-pointer"
                 >
                   <MapPin size={14} className="text-slate-400 shrink-0 mt-0.5" />
                   <span>{result.display_name}</span>
@@ -297,7 +325,7 @@ export default function MapPickerModal({ isOpen, onClose, onConfirm, initialLat,
         </div>
 
         {/* Map Container - using explicit height to prevent render bugs in modals */}
-        <div className="w-full relative bg-slate-100 border-b border-slate-100 z-10" style={{ height: "360px" }}>
+        <div className="w-full relative bg-slate-100 border-b border-slate-100 z-10 overflow-hidden" style={{ height: "360px" }}>
           {pinIcon && (
             <MapContainer
               center={position}
@@ -331,42 +359,42 @@ export default function MapPickerModal({ isOpen, onClose, onConfirm, initialLat,
         {/* Footer Address Info */}
         <div className="p-5 bg-slate-50 flex flex-col gap-4">
           <div className="flex gap-3">
-            <div className="w-9 h-9 rounded-2xl bg-teal-500/10 text-teal-600 flex items-center justify-center shrink-0">
-              <MapPin size={16} />
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-sm shrink-0">
+              <MapPin size={18} />
             </div>
             <div className="space-y-1">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Alamat Terpilih</span>
               {reverseGeocoding ? (
-                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                  <Loader2 size={12} className="animate-spin text-teal-500" />
+                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-semibold">
+                  <Loader2 size={12} className="animate-spin text-blue-500" />
                   Mencari alamat detail...
                 </div>
               ) : selectedAddress ? (
-                <p className="text-xs text-slate-700 font-semibold leading-relaxed">
+                <p className="text-xs text-slate-700 font-bold leading-relaxed">
                   {selectedAddress.alamatLengkap}
                 </p>
               ) : (
-                <p className="text-xs text-slate-400 font-medium">Klik pada peta untuk mengambil detail alamat.</p>
+                <p className="text-xs text-slate-400 font-semibold">Klik pada peta untuk mengambil detail alamat.</p>
               )}
             </div>
           </div>
 
           <div className="flex items-center justify-between border-t border-slate-200/60 pt-4">
-            <div className="text-[10px] font-mono text-slate-400">
+            <div className="text-[10px] font-mono text-slate-400 font-semibold">
               {position[0].toFixed(6)}, {position[1].toFixed(6)}
             </div>
             <div className="flex gap-2">
               <Button
                 variant="outline"
                 onClick={onClose}
-                className="h-10 rounded-2xl text-xs font-bold text-slate-500 border-slate-200 hover:bg-slate-100"
+                className="h-10 rounded-2xl text-xs font-bold text-slate-500 border-slate-200 hover:bg-slate-100 transition-all cursor-pointer"
               >
                 Batal
               </Button>
               <Button
                 disabled={!selectedAddress || reverseGeocoding}
                 onClick={() => selectedAddress && onConfirm(selectedAddress)}
-                className="h-10 px-5 rounded-2xl text-xs font-bold bg-teal-500 hover:bg-teal-600 text-white shadow-lg shadow-teal-500/15 disabled:opacity-50"
+                className="h-10 px-5 rounded-2xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/15 disabled:opacity-50 transition-all cursor-pointer"
               >
                 Gunakan Lokasi Ini
               </Button>

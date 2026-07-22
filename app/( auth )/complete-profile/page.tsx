@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/lib/prisma";
-import OnboardingForm from "./components/OnboardingForm";
+import OnboardingForm from "./components/LayoutForm";
 
 export const metadata = {
   title: "Complete Your Profile | Bounty",
